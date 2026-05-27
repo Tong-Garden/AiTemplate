@@ -1,0 +1,46 @@
+#!/bin/bash
+
+# Frontend pre-push hook
+# Runs comprehensive TypeScript/JavaScript checks before pushing
+
+echo "🎨 Running frontend pre-push checks..."
+
+# Check if we're pushing to main/master
+remote=$1
+url=$2
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "refs/heads/main" ] || [ "$remote_ref" = "refs/heads/master" ]; then
+        echo "🛡️ Pushing to main branch. Running full frontend validation..."
+        
+        echo "  → Running prettier check..."
+        if ! npm run format -- --check; then
+            echo "❌ Code formatting failed. Run 'npm run format' to fix."
+            exit 1
+        fi
+        
+        echo "  → Running ESLint..."
+        if ! npm run lint; then
+            echo "❌ Linting failed. Fix ESLint issues."
+            exit 1
+        fi
+        
+        echo "  → Running TypeScript check..."
+        if ! npx tsc --noEmit; then
+            echo "❌ Type checking failed. Fix TypeScript issues."
+            exit 1
+        fi
+        
+        echo "✅ Frontend pre-push checks passed"
+    else
+        echo "📝 Feature branch push. Running basic frontend checks..."
+        if ! bash lint.sh; then
+            echo "❌ Basic frontend linting failed."
+            exit 1
+        fi
+        echo "✅ Frontend checks passed"
+    fi
+done
+
+echo "✅ Frontend pre-push completed"
+exit 0

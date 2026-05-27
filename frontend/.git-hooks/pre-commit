@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Frontend pre-commit hook
+# Runs TypeScript/JavaScript linting and formatting checks
+
+echo "🎨 Running frontend pre-commit checks..."
+
+# Check if TS/JS files were staged
+if ! git diff --cached --name-only --diff-filter=ACM | grep -E '\.(ts|tsx|js|jsx)$' > /dev/null; then
+    echo "📝 No TypeScript/JavaScript files staged. Skipping frontend checks."
+    exit 0
+fi
+
+echo "📦 TypeScript/JavaScript files detected. Running linting..."
+
+# Run frontend linting script
+if ! bash lint.sh; then
+    echo "❌ Frontend linting failed. Please fix the issues before committing."
+    echo ""
+    echo "To fix automatically:"
+    echo "  npm run format"
+    echo "  npm run lint"
+    echo ""
+    echo "Then fix any remaining TypeScript issues manually."
+    exit 1
+fi
+
+echo "✅ Frontend pre-commit checks passed"
+exit 0

@@ -1,0 +1,186 @@
+@import '@syncfusion/ej2-base/styles/material.css';
+@import '@syncfusion/ej2-buttons/styles/material.css';
+@import '@syncfusion/ej2-calendars/styles/material.css';
+@import '@syncfusion/ej2-dropdowns/styles/material.css';
+@import '@syncfusion/ej2-inputs/styles/material.css';
+@import '@syncfusion/ej2-navigations/styles/material.css';
+@import '@syncfusion/ej2-popups/styles/material.css';
+@import '@syncfusion/ej2-splitbuttons/styles/material.css';
+@import '@syncfusion/ej2-grids/styles/material.css';
+
+/* Fix Syncfusion toolbar button visibility in light theme */
+.e-grid .e-toolbar .e-btn {
+  color: rgba(0, 0, 0, 0.87) !important;
+}
+
+.e-grid .e-toolbar .e-btn:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.e-grid .e-toolbar .e-btn.e-primary {
+  color: #fff !important;
+  background-color: #1976d2 !important;
+}
+
+.e-grid .e-toolbar .e-btn.e-primary:hover {
+  background-color: #1565c0 !important;
+}
+
+/* Light theme group drop area styling */
+body:not(.dark-mode) .e-grid .e-groupdroparea {
+  background-color: #5f9874 !important;
+}
+
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-grouptext,
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-icons,
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-btn {
+  color: #ffffff !important;
+}
+
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-ungroupbutton,
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-group-animator,
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-chip,
+body:not(.dark-mode) .e-grid .e-groupdroparea > div {
+  background-color: #d9861a !important;
+  border-color: #d9861a !important;
+}
+
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-ungroupbutton:hover,
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-group-animator:hover,
+body:not(.dark-mode) .e-grid .e-groupdroparea .e-chip:hover {
+  background-color: #1f5634 !important;
+  border-color: #1f5634 !important;
+}
+
+/* Dark theme overrides */
+body.dark-mode .e-grid .e-toolbar .e-btn {
+  color: rgba(255, 255, 255, 0.87) !important;
+}
+
+body.dark-mode .e-grid .e-toolbar .e-btn:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.gallery-item {
+  margin: 5px;
+}
+
+.gallery-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  /* Default grid for smaller screens */
+  gap: 8px;
+  /* Add spacing between items */
+}
+
+.lightGallery-captions {
+  h4 {
+    transform: translate3d(60px, 0, 0px);
+  }
+
+  p {
+    transform: translate3d(-60px, 0, 0px);
+  }
+
+  h4,
+  p {
+    opacity: 0;
+  }
+}
+
+.lg-current {
+  .lightGallery-captions {
+    h4,
+    p {
+      transform: translate3d(0, 0, 0px);
+    }
+
+    h4,
+    p {
+      opacity: 1;
+    }
+  }
+}
+
+.lg-slide-progress {
+  .lightGallery-captions {
+    h4 {
+      transform: translate3d(-60px, 0, 0px);
+    }
+
+    p {
+      transform: translate3d(60px, 0, 0px);
+    }
+
+    h4,
+    p {
+      opacity: 0;
+    }
+  }
+}
+
+.lightGallery-captions {
+  h4,
+  p {
+    transition:
+      transform 0.4s ease-in-out,
+      opacity 0.4s ease-in;
+  }
+}
+
+.lg-current {
+  .lightGallery-captions {
+    h4,
+    p {
+      transition-delay: 500ms;
+    }
+  }
+
+  &.lg-slide-progress {
+    .lightGallery-captions {
+      h4,
+      p {
+        transition-delay: 0ms;
+      }
+    }
+  }
+}
+
+.lg-backdrop,
+.lg-outer {
+  z-index: 1301 !important;
+  /* Higher than MUI Drawer (default 1200) */
+}
+
+.lg-toolbar,
+.lg-prev,
+.lg-next {
+  z-index: 1302 !important;
+  /* Ensure navigation buttons are visible */
+}
+
+/* Syncfusion Grid - removed hardcoded light backgrounds to support dark theme */
+
+/* For medium devices (e.g., tablets) */
+@media (min-width: 600px) {
+  .gallery-container {
+    grid-template-columns: repeat(2, 1fr);
+    /* 2 columns on medium screens */
+  }
+}
+
+/* For large devices (e.g., laptops/desktops) */
+@media (min-width: 900px) {
+  .gallery-container {
+    grid-template-columns: repeat(3, 1fr);
+    /* 3 columns on large screens */
+  }
+}
+
+/* For extra-large devices (e.g., large desktops) */
+@media (min-width: 1200px) {
+  .gallery-container {
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 columns on extra-large screens */
+  }
+}

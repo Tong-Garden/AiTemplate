@@ -1,0 +1,39 @@
+{
+  "version": "0.0.1",
+  "permissions": {
+    "allow": [
+      "Bash(python scripts/zip_project.py)",
+      "Bash(python scripts/auto_save_memory.py)",
+      "Bash(python scripts/lint_changed_files.py)",
+      "Bash(python scripts/*)"
+    ]
+  },
+  "hooks": {
+    "PreCompact": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/auto_save_memory.py",
+            "statusMessage": "💾 Auto-saving session summary to memory...",
+            "async": false
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python scripts/lint_changed_files.py",
+            "statusMessage": "🔍 Linting changed files...",
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}

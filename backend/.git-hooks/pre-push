@@ -1,0 +1,52 @@
+#!/bin/bash
+
+# Backend pre-push hook
+# Runs comprehensive Python checks before pushing
+
+echo "🐍 Running backend pre-push checks..."
+
+# Check if we're pushing to main/master
+remote=$1
+url=$2
+
+while read local_ref local_sha remote_ref remote_sha; do
+    if [ "$remote_ref" = "refs/heads/main" ] || [ "$remote_ref" = "refs/heads/master" ]; then
+        echo "🛡️ Pushing to main branch. Running full backend validation..."
+        
+        echo "  → Running isort check..."
+        if ! uv run isort app/ --check-only; then
+            echo "❌ Import sorting failed. Run 'uv run isort app/' to fix."
+            exit 1
+        fi
+        
+        echo "  → Running black check..."
+        if ! uv run black app/ --check; then
+            echo "❌ Code formatting failed. Run 'uv run black app/' to fix."
+            exit 1
+        fi
+        
+        echo "  → Running flake8..."
+        if ! uv run flake8 app/; then
+            echo "❌ Style check failed. Fix flake8 issues."
+            exit 1
+        fi
+        
+        echo "  → Running mypy..."
+        if ! uv run mypy app/; then
+            echo "❌ Type checking failed. Fix mypy issues."
+            exit 1
+        fi
+        
+        echo "✅ Backend pre-push checks passed"
+    else
+        echo "📝 Feature branch push. Running basic backend checks..."
+        if ! bash lint.sh; then
+            echo "❌ Basic backend linting failed."
+            exit 1
+        fi
+        echo "✅ Backend checks passed"
+    fi
+done
+
+echo "✅ Backend pre-push completed"
+exit 0

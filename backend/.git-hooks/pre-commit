@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Backend pre-commit hook
+# Runs Python linting and formatting checks
+
+echo "🐍 Running backend pre-commit checks..."
+
+# Check if Python files were staged
+if ! git diff --cached --name-only --diff-filter=ACM | grep -E '\.py$' > /dev/null; then
+    echo "📝 No Python files staged. Skipping backend checks."
+    exit 0
+fi
+
+echo "📦 Python files detected. Running linting..."
+
+# Run backend linting script
+if ! bash lint.sh; then
+    echo "❌ Backend linting failed. Please fix the issues before committing."
+    echo ""
+    echo "To fix automatically:"
+    echo "  uv run isort app/"
+    echo "  uv run black app/"
+    echo ""
+    echo "Then fix any remaining flake8/mypy issues manually."
+    exit 1
+fi
+
+echo "✅ Backend pre-commit checks passed"
+exit 0
