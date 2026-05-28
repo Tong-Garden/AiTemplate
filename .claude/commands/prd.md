@@ -1,19 +1,56 @@
 # /prd — Generate Product Requirements Document
 
-Generate a complete, interactive PRD HTML file for any feature. Auto-reads the codebase to extract entities, relationships, API endpoints, and UI components.
+Generate complete, interactive PRD HTML files for one or **multiple** features. Auto-reads the codebase to extract entities, relationships, API endpoints, and UI components.
 
 ## Trigger Phrases
-- "create PRD for X"
-- "generate product requirements for X"
-- "write PRD for X"
-- "create requirements doc for X"
-- `/prd <feature name>`
+- "create PRD for X" (single feature)
+- "create PRD for X, Y, Z" (multiple features, comma-separated)
+- "generate PRD for multiple features"
+- "write PRD documents"
+- `/prd` (triggers feature selection UI)
+- `/prd <feature name>` (single feature, backward compatible)
+- `/prd <feature1>, <feature2>, <feature3>` (multiple features)
+
+---
+
+## Feature Selection (NEW)
+
+### If User Doesn't Specify Features:
+1. **Auto-detect available features** from `backend/app/features/`
+2. **Display a list** of all available features with checkboxes
+3. **Ask user to select one or more** features
+4. **Show selection summary** before proceeding
+
+```
+Available features:
+☐ user
+☐ grn
+☐ purchase_order
+☐ inventory
+☐ supplier
+
+Selected: (waiting for you to choose)
+```
+
+### If User Specifies Features:
+- Parse comma-separated feature names: `/prd user, grn, inventory`
+- Validate each feature exists
+- Proceed directly to generation
 
 ---
 
 ## What To Do — Step by Step
 
-### Step 1: Explore the codebase for the feature
+### Step 0: Get Feature List (NEW)
+**Before anything, detect available features:**
+```bash
+ls -d backend/app/features/*/ | xargs -n1 basename | sort
+```
+Store this list. If no features specified by user, show selection UI.
+
+---
+
+### Step 1: For Each Selected Feature — Explore the codebase
 Before writing anything, READ these files to extract real data:
 
 **Backend — extract entities, fields, relationships, endpoints:**
@@ -58,16 +95,32 @@ frontend/src/features/<feature>/schemas/ ← Zod schemas, validation rules
 - Forms and their fields
 - Validation rules per field
 
-### Step 3: Create output folder
+### Step 3: Create output folders (for each feature)
 ```bash
 mkdir -p docs/prd/<FeatureName>
 ```
 
-### Step 4: Write the PRD HTML file
+### Step 4: Write the PRD HTML file (for each feature)
 Output to: `docs/prd/<FeatureName>/<FEATURE_NAME>_PRD.html`
 
-### Step 5: Confirm
-Tell the user: file path, section count, entity count, endpoint count.
+### Step 5: Confirm (after all features done)
+For **each feature**, tell the user:
+- ✅ File path: `docs/prd/<FeatureName>/<FEATURE_NAME>_PRD.html`
+- Section count
+- Entity count
+- Endpoint count
+
+**Then provide a summary:**
+```
+📊 PRD Generation Complete!
+
+Generated 3 documents:
+1. ✅ docs/prd/User/USER_PRD.html (8 entities, 12 endpoints)
+2. ✅ docs/prd/GRN/GRN_PRD.html (6 entities, 10 endpoints)
+3. ✅ docs/prd/PurchaseOrder/PURCHASE_ORDER_PRD.html (5 entities, 8 endpoints)
+
+Total: 19 entities, 30 endpoints across 3 features
+```
 
 ---
 

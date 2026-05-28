@@ -1,21 +1,46 @@
 # /userflow — Generate Visual User Flow Documentation
 
-Generate a complete, interactive user flow HTML file for any feature using the **Claude Design System** with Mermaid diagrams.
+Generate complete, interactive user flow HTML files for one or **multiple** features using the **Claude Design System** with Mermaid diagrams.
 
 ## Trigger Phrases
 Use this command when the user says any of:
-- "create user flow for X"
-- "generate user flow for X"
-- "create flow diagram for X"
-- "generate visual flow for X"
-- "create user flow documentation"
-- `/userflow <feature name>`
+- "create user flow for X" (single feature)
+- "create user flow for X, Y, Z" (multiple features, comma-separated)
+- "generate user flow for multiple features"
+- "create flow diagrams"
+- `/userflow` (triggers feature selection UI)
+- `/userflow <feature name>` (single feature, backward compatible)
+- `/userflow <feature1>, <feature2>` (multiple features)
+
+---
+
+## Feature Selection (NEW)
+
+### If User Doesn't Specify Features:
+1. **Auto-detect available features** from `backend/app/features/`
+2. **Display a list** of all available features with checkboxes
+3. **Ask user to select one or more** features
+4. **Show selection summary** before proceeding
+
+### If User Specifies Features:
+- Parse comma-separated feature names: `/userflow user, grn`
+- Validate each feature exists
+- Proceed directly to generation
 
 ---
 
 ## What To Do
 
-1. **Understand the feature** — Read these paths for the feature before drawing any diagrams:
+### Step 0: Get Feature List (NEW)
+**Before anything, detect available features:**
+```bash
+ls -d backend/app/features/*/ | xargs -n1 basename | sort
+```
+Store this list. If no features specified by user, show selection UI.
+
+---
+
+1. **For Each Selected Feature — Understand it** — Read these paths before drawing any diagrams:
    - `backend/app/features/<feature>/infrastructure/models/` — table schema, fields, status values, FK relationships
    - `backend/app/features/<feature>/domain/` — domain entities, status enumerations, business rules
    - `backend/app/features/<feature>/presentation/api.py` — all API endpoints and HTTP methods
@@ -24,11 +49,25 @@ Use this command when the user says any of:
 
 2. **Plan the diagrams** — Identify all distinct user journeys (create, edit, delete, list, filter, error flows, etc.) and map them to individual diagrams.
 
-3. **Create the output folder** — Run `mkdir -p docs/flows/<FeatureName>` to create the feature folder inside `docs/flows/` at the project root. Create `docs/flows/` itself if it does not exist yet.
+3. **Create output folders** (for each feature) — Run `mkdir -p docs/flows/<FeatureName>` to create the feature folder inside `docs/flows/` at the project root. Create `docs/flows/` itself if it does not exist yet.
 
-4. **Generate the HTML file** — Write the output to `docs/flows/<FeatureName>/<FEATURE_NAME>_USER_FLOWS.html` using the exact template below.
+4. **Generate the HTML files** (for each feature) — Write to `docs/flows/<FeatureName>/<FEATURE_NAME>_USER_FLOWS.html` using the exact template below.
 
-5. **Confirm** — Tell the user the full file path and how many diagrams were generated.
+5. **Confirm** (after all features done) — For **each feature**, tell the user:
+   - File path: `docs/flows/<FeatureName>/<FEATURE_NAME>_USER_FLOWS.html`
+   - Number of diagrams generated
+   
+   Then provide a summary:
+   ```
+   📊 User Flow Generation Complete!
+   
+   Generated 3 documents:
+   1. ✅ docs/flows/User/USER_USER_FLOWS.html (10 diagrams)
+   2. ✅ docs/flows/GRN/GRN_USER_FLOWS.html (12 diagrams)
+   3. ✅ docs/flows/PurchaseOrder/PURCHASE_ORDER_USER_FLOWS.html (10 diagrams)
+   
+   Total: 32 flow diagrams across 3 features
+   ```
 
 ---
 

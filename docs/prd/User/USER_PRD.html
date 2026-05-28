@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User PRD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a202c; }
+
+        /* HEADER */
+        .header {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: white; padding: 40px 32px;
+            display: flex; align-items: center; gap: 20px;
+        }
+        .header-icon { font-size: 3em; }
+        .header h1 { font-size: 2em; font-weight: 700; letter-spacing: -0.02em; }
+        .header p  { margin-top: 6px; opacity: 0.75; font-size: 0.95em; }
+
+        /* META BAR */
+        .meta-bar {
+            background: #1e3a5f;
+            display: flex; justify-content: center; flex-wrap: wrap;
+        }
+        .meta-item {
+            padding: 12px 32px;
+            border-right: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+        }
+        .meta-item:last-child { border-right: none; }
+        .meta-val { font-size: 1.3em; font-weight: 700; color: #60a5fa; }
+        .meta-lbl { font-size: 0.72em; color: rgba(255,255,255,0.55); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+
+        /* LAYOUT */
+        .layout { display: flex; min-height: calc(100vh - 150px); }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 230px; flex-shrink: 0;
+            background: #fff; border-right: 1px solid #e5e7eb;
+            padding: 20px 0; position: sticky; top: 0;
+            height: 100vh; overflow-y: auto;
+        }
+        .sidebar-label {
+            font-size: 0.68em; font-weight: 700; color: #9ca3af;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            padding: 0 16px 10px;
+        }
+        .nav-btn {
+            display: flex; align-items: center; gap: 10px;
+            width: 100%; padding: 10px 16px;
+            border: none; background: transparent; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 0.88em;
+            color: #4b5563; text-align: left; transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .nav-btn:hover { background: #f9fafb; color: #1a202c; }
+        .nav-btn.active {
+            background: #eff6ff; color: #2563eb;
+            font-weight: 600; border-left-color: #3b82f6;
+        }
+        .nav-icon {
+            width: 24px; height: 24px; border-radius: 6px;
+            background: #f0f1f3; font-size: 0.85em;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .nav-btn.active .nav-icon { background: #3b82f6; }
+
+        /* MAIN */
+        .main { flex: 1; padding: 32px; overflow: auto; }
+
+        /* SECTION PANEL */
+        .panel { display: none; }
+        .panel.active { display: block; }
+
+        .panel-header {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 12px 12px 0 0; padding: 24px 28px; color: white;
+        }
+        .panel-badge {
+            display: inline-block; background: rgba(255,255,255,0.18);
+            padding: 3px 12px; border-radius: 20px;
+            font-size: 0.75em; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 10px;
+        }
+        .panel-title { font-size: 1.6em; font-weight: 700; margin-bottom: 6px; }
+        .panel-desc  { opacity: 0.85; font-size: 0.93em; }
+
+        .panel-body {
+            background: #fff; border: 1px solid #e5e7eb;
+            border-top: none; border-radius: 0 0 12px 12px; padding: 32px;
+        }
+
+        /* CONTENT BLOCKS */
+        .info-box {
+            background: #eff6ff; border-left: 4px solid #3b82f6;
+            padding: 14px 18px; border-radius: 0 8px 8px 0;
+            margin-bottom: 28px; font-size: 0.93em;
+            color: #1e3a8a; line-height: 1.65;
+        }
+        .warn-box {
+            background: #fffbeb; border-left: 4px solid #f59e0b;
+            padding: 14px 18px; border-radius: 0 8px 8px 0;
+            margin-bottom: 20px; font-size: 0.92em; color: #78350f;
+        }
+
+        h2.section-heading {
+            font-size: 1.1em; font-weight: 700; color: #1a202c;
+            margin: 28px 0 14px; padding-bottom: 8px;
+            border-bottom: 2px solid #f0f2f5;
+        }
+        h2.section-heading:first-child { margin-top: 0; }
+
+        /* TABLE */
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; font-size: 0.9em; }
+        .data-table th {
+            background: #f8f9fb; padding: 10px 14px;
+            text-align: left; font-weight: 600; color: #374151;
+            border: 1px solid #e5e7eb; font-size: 0.85em;
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .data-table td {
+            padding: 10px 14px; border: 1px solid #e5e7eb;
+            color: #4b5563; vertical-align: top; line-height: 1.5;
+        }
+        .data-table tr:nth-child(even) td { background: #fafbfc; }
+
+        /* BADGES */
+        .badge {
+            display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 0.78em; font-weight: 600;
+        }
+        .badge-must    { background: #dcfce7; color: #166534; }
+        .badge-should  { background: #dbeafe; color: #1e40af; }
+        .badge-could   { background: #fef9c3; color: #713f12; }
+        .badge-wont    { background: #f3f4f6; color: #6b7280; }
+        .badge-get     { background: #dbeafe; color: #1e40af; }
+        .badge-post    { background: #dcfce7; color: #166534; }
+        .badge-put     { background: #fef9c3; color: #92400e; }
+        .badge-delete  { background: #fee2e2; color: #991b1b; }
+        .badge-status  { background: #ede9fe; color: #5b21b6; }
+        .badge-pk      { background: #fef3c7; color: #92400e; }
+        .badge-fk      { background: #e0f2fe; color: #075985; }
+        .badge-req     { background: #fee2e2; color: #991b1b; }
+        .badge-opt     { background: #f3f4f6; color: #6b7280; }
+
+        /* MERMAID */
+        .mermaid-box {
+            background: #fafbfc; border: 1px solid #e5e7eb;
+            border-radius: 10px; padding: 32px 16px;
+            min-height: 280px; overflow-x: auto;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 24px;
+        }
+        .mermaid-box .mermaid { width: 100%; display: flex; justify-content: center; }
+        .mermaid-box svg { max-width: 100%; height: auto; }
+
+        /* USER STORY CARD */
+        .story-card {
+            border: 1px solid #e5e7eb; border-radius: 10px;
+            padding: 18px 20px; margin-bottom: 16px; background: #fff;
+        }
+        .story-role { font-size: 0.78em; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+        .story-text { font-size: 0.95em; color: #1a202c; margin-bottom: 12px; line-height: 1.6; }
+        .story-criteria { margin: 0; padding-left: 18px; }
+        .story-criteria li { font-size: 0.88em; color: #4b5563; margin-bottom: 4px; }
+
+        /* RISK CARD */
+        .risk-card {
+            border-left: 4px solid #f87171; background: #fff;
+            border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 12px;
+        }
+        .risk-title { font-weight: 600; font-size: 0.95em; margin-bottom: 4px; }
+        .risk-mitigation { font-size: 0.88em; color: #6b7280; }
+
+        /* DEFINITION OF DONE */
+        .dod-list { list-style: none; padding: 0; }
+        .dod-list li {
+            display: flex; align-items: flex-start; gap: 10px;
+            padding: 8px 0; border-bottom: 1px solid #f0f2f5;
+            font-size: 0.93em; color: #374151;
+        }
+        .dod-list li:last-child { border-bottom: none; }
+        .dod-check {
+            width: 18px; height: 18px; border: 2px solid #d1d5db;
+            border-radius: 4px; flex-shrink: 0; margin-top: 1px;
+        }
+
+        /* NAV ARROWS */
+        .nav-arrows {
+            display: flex; justify-content: space-between;
+            align-items: center; margin-top: 32px; padding-top: 20px;
+            border-top: 1px solid #f0f2f5;
+        }
+        .arrow-btn {
+            display: flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border: 1px solid #e5e7eb;
+            background: #fff; border-radius: 8px; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-size: 0.88em;
+            font-weight: 500; color: #374151; transition: all 0.15s;
+        }
+        .arrow-btn:hover { background: #f9fafb; border-color: #3b82f6; color: #2563eb; }
+        .arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .progress-label { font-size: 0.85em; color: #6b7280; }
+
+        @media (max-width: 768px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; display: flex; padding: 10px; gap: 6px; }
+            .nav-btn { width: auto; padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 6px; border-left: 3px solid transparent; font-size: 0.8em; }
+            .main { padding: 16px; }
+            .meta-bar { flex-wrap: wrap; }
+            .meta-item { padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="header-icon">👤</div>
+    <div>
+        <h1>User — Product Requirements Document</h1>
+        <p>v1.0 &nbsp;·&nbsp; 2026-05-28 &nbsp;·&nbsp; Status: Draft</p>
+    </div>
+</div>
+
+<!-- META BAR -->
+<div class="meta-bar">
+    <div class="meta-item"><div class="meta-val">1</div><div class="meta-lbl">Entity</div></div>
+    <div class="meta-item"><div class="meta-val">6</div><div class="meta-lbl">API Endpoints</div></div>
+    <div class="meta-item"><div class="meta-val">6</div><div class="meta-lbl">User Stories</div></div>
+    <div class="meta-item"><div class="meta-val">1</div><div class="meta-lbl">User Role</div></div>
+    <div class="meta-item"><div class="meta-val">0</div><div class="meta-lbl">Statuses</div></div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-label">Sections</div>
+        <button class="nav-btn active" onclick="showPanel(1)"><span class="nav-icon">📌</span> Overview</button>
+        <button class="nav-btn" onclick="showPanel(2)"><span class="nav-icon">🎯</span> Goals</button>
+        <button class="nav-btn" onclick="showPanel(3)"><span class="nav-icon">👤</span> User Stories</button>
+        <button class="nav-btn" onclick="showPanel(4)"><span class="nav-icon">⚙️</span> Functional Req</button>
+        <button class="nav-btn" onclick="showPanel(5)"><span class="nav-icon">🛡️</span> Non-Functional</button>
+        <button class="nav-btn" onclick="showPanel(6)"><span class="nav-icon">🗄️</span> Data Model</button>
+        <button class="nav-btn" onclick="showPanel(7)"><span class="nav-icon">📡</span> API Contract</button>
+        <button class="nav-btn" onclick="showPanel(8)"><span class="nav-icon">🎨</span> UI Spec</button>
+        <button class="nav-btn" onclick="showPanel(9)"><span class="nav-icon">🔗</span> Dependencies</button>
+        <button class="nav-btn" onclick="showPanel(10)"><span class="nav-icon">⚠️</span> Risks</button>
+        <button class="nav-btn" onclick="showPanel(11)"><span class="nav-icon">✅</span> Definition of Done</button>
+    </nav>
+
+    <main class="main">
+
+        <!-- ══════════════════════ PANEL 1: OVERVIEW ══════════════════════ -->
+        <div id="panel-1" class="panel active">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 1 OF 11</div>
+                <div class="panel-title">Executive Overview</div>
+                <div class="panel-desc">What this feature is, why it exists, and who it serves</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The User management feature provides system administrators with the ability to create, retrieve, update, delete, and bulk import user accounts. This foundation supports role-based access control, user auditing, and account lifecycle management across the application.</div>
+
+                <h2 class="section-heading">Problem Statement</h2>
+                <p style="color:#4b5563;line-height:1.7;margin-bottom:20px;">A modern application requires a centralized, reliable way to manage user accounts with validation, duplicate prevention, and bulk import capabilities. Without this, manual user provisioning is error-prone and time-consuming for administrators.</p>
+
+                <h2 class="section-heading">Solution</h2>
+                <p style="color:#4b5563;line-height:1.7;margin-bottom:20px;">Build a complete User Management API with full CRUD operations, email validation, duplicate email prevention, account activation/deactivation, and Excel bulk import. Pair it with an intuitive React UI featuring a searchable data grid, inline editing, and upload dialog.</p>
+
+                <h2 class="section-heading">Success Metrics</h2>
+                <table class="data-table">
+                    <thead><tr><th>Metric</th><th>Target</th><th>How Measured</th></tr></thead>
+                    <tbody>
+                        <tr><td>User creation time</td><td>Under 2 seconds</td><td>API response time test</td></tr>
+                        <tr><td>Bulk import speed</td><td>100 users in under 5 seconds</td><td>Upload performance test</td></tr>
+                        <tr><td>Email validation accuracy</td><td>100% rejection of invalid emails</td><td>Integration test coverage</td></tr>
+                        <tr><td>API availability</td><td>99.5% uptime</td><td>Production monitoring</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" disabled>← Previous</button>
+                    <span class="progress-label">1 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(2)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 2: GOALS ══════════════════════ -->
+        <div id="panel-2" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 2 OF 11</div>
+                <div class="panel-title">Goals and Non-Goals</div>
+                <div class="panel-desc">Explicit scope boundaries to prevent feature creep</div>
+            </div>
+            <div class="panel-body">
+                <h2 class="section-heading">Goals — In Scope for v1</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Goal</th><th>Priority</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Create users with name, email, phone, and active status</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>2</td><td>List all users with search and pagination</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>3</td><td>Retrieve, update, and delete individual users</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>4</td><td>Validate email format and prevent duplicates</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>5</td><td>Bulk import users from Excel files</td><td><span class="badge badge-should">Should</span></td></tr>
+                        <tr><td>6</td><td>Provide React UI with Syncfusion DataGrid</td><td><span class="badge badge-must">Must</span></td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Non-Goals — Explicitly Out of Scope</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Non-Goal</th><th>Reason</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>User authentication (login/logout)</td><td>Managed by separate auth module; this is user admin only</td></tr>
+                        <tr><td>2</td><td>Role-based access control (RBAC) assignment</td><td>Planned for v2; v1 focuses on user lifecycle</td></tr>
+                        <tr><td>3</td><td>User profile pictures / avatars</td><td>Out of scope; considered for v2</td></tr>
+                        <tr><td>4</td><td>Password management / reset flows</td><td>Handled separately; users provisioned by admin</td></tr>
+                        <tr><td>5</td><td>Email notifications on user creation</td><td>To be added when notification service is ready</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(1)">← Previous</button>
+                    <span class="progress-label">2 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(3)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 3: USER STORIES ══════════════════════ -->
+        <div id="panel-3" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 3 OF 11</div>
+                <div class="panel-title">User Personas and Stories</div>
+                <div class="panel-desc">Who uses this feature and what they need to accomplish</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Each story follows: <strong>As a [role], I want to [action] so that [benefit].</strong> Acceptance criteria define when a story is done.</div>
+
+                <div class="story-card">
+                    <div class="story-role">System Administrator</div>
+                    <div class="story-text">As a system administrator, I want to create a new user account with name, email, phone, and active status so that I can onboard new team members into the system.</div>
+                    <ul class="story-criteria">
+                        <li>Given I provide valid user details (name 2+ chars, valid email, phone 5+ chars), the user is created with HTTP 201</li>
+                        <li>When the email is already in use, I see a "Duplicate email" error</li>
+                        <li>When I submit an invalid email, I see an "Invalid email" error</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">System Administrator</div>
+                    <div class="story-text">As a system administrator, I want to view a searchable list of all users with pagination so that I can quickly find and manage specific users.</div>
+                    <ul class="story-criteria">
+                        <li>Given I load the Users page, I see a Syncfusion DataGrid with all users</li>
+                        <li>When I use the Search toolbar, results filter in real-time</li>
+                        <li>When users exceed 20 per page, pagination controls appear</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">System Administrator</div>
+                    <div class="story-text">As a system administrator, I want to edit user details inline in the data grid so that I can quickly update names, emails, phones, and active status without opening a form.</div>
+                    <ul class="story-criteria">
+                        <li>Given I double-click a row in the DataGrid, the row enters edit mode</li>
+                        <li>When I change the is_active checkbox, the change persists immediately</li>
+                        <li>When validation fails (e.g., duplicate email), an error displays inline</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">System Administrator</div>
+                    <div class="story-text">As a system administrator, I want to delete a user from the system so that I can remove inactive or departed team members.</div>
+                    <ul class="story-criteria">
+                        <li>Given I click the Delete button for a user, the user is removed with HTTP 200</li>
+                        <li>When deletion succeeds, the grid refreshes automatically</li>
+                        <li>When an error occurs, I see a toast notification with the error message</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">System Administrator</div>
+                    <div class="story-text">As a system administrator, I want to bulk import users from an Excel file so that I can onboard multiple team members at once instead of creating them individually.</div>
+                    <ul class="story-criteria">
+                        <li>Given I click the Upload button and select a .xlsx file, the file is sent to the server</li>
+                        <li>When import succeeds, I see a toast: "N users imported successfully"</li>
+                        <li>When a user already exists (duplicate email), that row is skipped without error</li>
+                        <li>When the file format is invalid, I see "File must be an Excel file"</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">System Administrator</div>
+                    <div class="story-text">As a system administrator, I want to view detailed user information so that I can audit user attributes and confirm correct provisioning.</div>
+                    <ul class="story-criteria">
+                        <li>Given I click a user row or use the detail view, I see all user fields: id, name, email, phone, is_active, created_at, updated_at</li>
+                        <li>When I navigate back, the list is preserved with my previous search and page</li>
+                    </ul>
+                </div>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(2)">← Previous</button>
+                    <span class="progress-label">3 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(4)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 4: FUNCTIONAL REQUIREMENTS ══════════════════════ -->
+        <div id="panel-4" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 4 OF 11</div>
+                <div class="panel-title">Functional Requirements</div>
+                <div class="panel-desc">What the system must do — MoSCoW prioritised</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">
+                    <strong>MoSCoW:</strong>
+                    <span class="badge badge-must">Must</span> — required for launch &nbsp;
+                    <span class="badge badge-should">Should</span> — important but not blocking &nbsp;
+                    <span class="badge badge-could">Could</span> — nice to have &nbsp;
+                    <span class="badge badge-wont">Won't</span> — out of scope
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Requirement</th><th>Priority</th><th>Notes</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Email must be a valid email format (regex pattern)</td><td><span class="badge badge-must">Must</span></td><td>Enforced at both backend and frontend layers</td></tr>
+                        <tr><td>2</td><td>Email uniqueness constraint (no duplicates)</td><td><span class="badge badge-must">Must</span></td><td>Checked before create/update; returns 400 if duplicate</td></tr>
+                        <tr><td>3</td><td>Name field must be 2–255 characters</td><td><span class="badge badge-must">Must</span></td><td>Validated in Pydantic schema and Zod schema</td></tr>
+                        <tr><td>4</td><td>Phone field must be 5–20 characters</td><td><span class="badge badge-must">Must</span></td><td>Validated in both backend and frontend schemas</td></tr>
+                        <tr><td>5</td><td>Active status toggleable (boolean field)</td><td><span class="badge badge-must">Must</span></td><td>Default is True; can be set at creation and update</td></tr>
+                        <tr><td>6</td><td>Audit timestamps (created_at, updated_at) auto-managed</td><td><span class="badge badge-must">Must</span></td><td>Set by database on insert/update; not user-editable</td></tr>
+                        <tr><td>7</td><td>List endpoint returns paginated results (page, limit)</td><td><span class="badge badge-must">Must</span></td><td>Default 20 per page, max 100</td></tr>
+                        <tr><td>8</td><td>All endpoints return standard response envelope (status, data, errors, meta)</td><td><span class="badge badge-must">Must</span></td><td>Enforced at presentation layer</td></tr>
+                        <tr><td>9</td><td>HTTP status codes match response type (201 for create, 404 for not found, etc.)</td><td><span class="badge badge-must">Must</span></td><td>Consistent error handling throughout</td></tr>
+                        <tr><td>10</td><td>Excel bulk import accepts .xlsx/.xls files</td><td><span class="badge badge-should">Should</span></td><td>Skips duplicate emails silently; returns count of successful imports</td></tr>
+                        <tr><td>11</td><td>UI grid supports inline edit mode with Save/Cancel</td><td><span class="badge badge-must">Must</span></td><td>Double-click to edit; validation errors display immediately</td></tr>
+                        <tr><td>12</td><td>Search toolbar filters grid in real-time without page reload</td><td><span class="badge badge-should">Should</span></td><td>Syncfusion DataGrid Search service</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(3)">← Previous</button>
+                    <span class="progress-label">4 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(5)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 5: NON-FUNCTIONAL ══════════════════════ -->
+        <div id="panel-5" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 5 OF 11</div>
+                <div class="panel-title">Non-Functional Requirements</div>
+                <div class="panel-desc">Performance, security, scalability, and reliability standards</div>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead><tr><th>Category</th><th>Requirement</th><th>Target</th></tr></thead>
+                    <tbody>
+                        <tr><td>Performance</td><td>API endpoint response time</td><td>Under 200ms for single user, under 500ms for list with pagination</td></tr>
+                        <tr><td>Performance</td><td>Excel bulk import throughput</td><td>100 users in under 5 seconds</td></tr>
+                        <tr><td>Security</td><td>Email validation</td><td>Regex pattern enforced; no SQL injection via email</td></tr>
+                        <tr><td>Security</td><td>Input sanitization</td><td>All user inputs validated and sanitized at API boundary</td></tr>
+                        <tr><td>Security</td><td>No sensitive data in errors</td><td>Stack traces and internal details never exposed to client</td></tr>
+                        <tr><td>Security</td><td>CORS configuration</td><td>Allowed origin: http://localhost:4000 (configurable per environment)</td></tr>
+                        <tr><td>Scalability</td><td>Pagination</td><td>All list endpoints support page + limit params; max 100 items per page</td></tr>
+                        <tr><td>Scalability</td><td>Database indexing</td><td>Indexes on email (unique), phone, is_active, and created_at columns</td></tr>
+                        <tr><td>Availability</td><td>API uptime</td><td>99.5% monthly SLA</td></tr>
+                        <tr><td>Availability</td><td>Error handling</td><td>All errors caught and returned as structured JSON with clear detail messages</td></tr>
+                        <tr><td>Usability</td><td>Form validation feedback</td><td>Real-time validation errors on field level; toast for server errors</td></tr>
+                        <tr><td>Usability</td><td>Loading states</td><td>Backdrop loader on async operations; disabled buttons during processing</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(4)">← Previous</button>
+                    <span class="progress-label">5 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(6)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 6: DATA MODEL ══════════════════════ -->
+        <div id="panel-6" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 6 OF 11</div>
+                <div class="panel-title">Data Model</div>
+                <div class="panel-desc">Entities, fields, relationships, constraints, and ERD</div>
+            </div>
+            <div class="panel-body">
+
+                <!-- ERD DIAGRAM -->
+                <h2 class="section-heading">Entity Relationship Diagram</h2>
+                <div class="info-box">The User feature is a simple entity with no relationships. All user data is self-contained.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m-erd">
+erDiagram
+    USER {
+        string     id          PK "Primary key (UUID)"
+        string     name        "User full name"
+        string     email       "Email address (unique)"
+        string     phone       "Phone number"
+        boolean    is_active   "Account active status"
+        datetime   created_at  "Record creation timestamp"
+        datetime   updated_at  "Record last update timestamp"
+    }
+                    </div>
+                </div>
+
+                <!-- ENTITY TABLES — one per entity -->
+                <h2 class="section-heading">Entity Definitions</h2>
+
+                <h3 style="font-size:1em;font-weight:600;color:#374151;margin:20px 0 10px;">User</h3>
+                <table class="data-table">
+                    <thead><tr><th>Field</th><th>Type</th><th>Key</th><th>Nullable</th><th>Default</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>id</td><td>VARCHAR(36)</td><td><span class="badge badge-pk">PK</span></td><td>No</td><td>UUID (generated)</td><td>Primary key; unique identifier for each user</td></tr>
+                        <tr><td>name</td><td>VARCHAR(255)</td><td>—</td><td>No</td><td>—</td><td>User full name; must be 2–255 characters; indexed for search</td></tr>
+                        <tr><td>email</td><td>VARCHAR(255)</td><td>UNIQUE</td><td>No</td><td>—</td><td>User email address; must be valid email format; unique constraint enforced; indexed</td></tr>
+                        <tr><td>phone</td><td>VARCHAR(20)</td><td>—</td><td>No</td><td>—</td><td>User phone number; must be 5–20 characters; indexed for filtering</td></tr>
+                        <tr><td>is_active</td><td>BOOLEAN</td><td>—</td><td>No</td><td>TRUE</td><td>Account activation status; indexed for filtering active/inactive users</td></tr>
+                        <tr><td>created_at</td><td>DATETIME</td><td>—</td><td>No</td><td>NOW()</td><td>Record creation timestamp; auto-managed by database</td></tr>
+                        <tr><td>updated_at</td><td>DATETIME</td><td>—</td><td>No</td><td>NOW()</td><td>Record last update timestamp; auto-managed by database</td></tr>
+                    </tbody>
+                </table>
+
+                <!-- RELATIONSHIPS TABLE -->
+                <h2 class="section-heading">Relationships</h2>
+                <div class="info-box">The User entity has no foreign keys or relationships in v1. It is a standalone table.</div>
+
+                <!-- STATUS ENUMERATIONS -->
+                <h2 class="section-heading">Status Enumerations</h2>
+                <div class="info-box">The User entity does not have status enumerations. The is_active boolean field controls user state (active vs. inactive).</div>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(5)">← Previous</button>
+                    <span class="progress-label">6 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(7)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 7: API CONTRACT ══════════════════════ -->
+        <div id="panel-7" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 7 OF 11</div>
+                <div class="panel-title">API Contract</div>
+                <div class="panel-desc">All endpoints, methods, auth, request and response shapes</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">All endpoints use the <strong>/v1/users</strong> prefix and return the standard response envelope: <code>{ status, data, errors, meta }</code>.</div>
+                <table class="data-table">
+                    <thead><tr><th>Method</th><th>Endpoint</th><th>Description</th><th>Request Body / Query</th><th>Response Status</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-post">POST</span></td>
+                            <td>/v1/users</td>
+                            <td>Create a new user</td>
+                            <td>CreateUserSchema: { name, email, phone, is_active? }</td>
+                            <td>201 Created / 400 Bad Request (validation, duplicate email)</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-get">GET</span></td>
+                            <td>/v1/users</td>
+                            <td>List all users (paginated)</td>
+                            <td>Query: page=1, limit=20</td>
+                            <td>200 OK with UserResponse[] and pagination metadata</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-get">GET</span></td>
+                            <td>/v1/users/{user_id}</td>
+                            <td>Retrieve a single user by ID</td>
+                            <td>Path param: user_id (UUID)</td>
+                            <td>200 OK / 404 Not Found</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-put">PUT</span></td>
+                            <td>/v1/users/{user_id}</td>
+                            <td>Update a user (all fields optional)</td>
+                            <td>UpdateUserSchema: { name?, email?, phone?, is_active? }</td>
+                            <td>200 OK / 400 Bad Request / 404 Not Found</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-delete">DELETE</span></td>
+                            <td>/v1/users/{user_id}</td>
+                            <td>Delete a user by ID</td>
+                            <td>Path param: user_id (UUID)</td>
+                            <td>200 OK / 404 Not Found</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-post">POST</span></td>
+                            <td>/v1/users/upload</td>
+                            <td>Bulk import users from Excel file</td>
+                            <td>multipart/form-data: file (.xlsx or .xls)</td>
+                            <td>200 OK with { count, message } / 400 Bad Request (invalid file)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Response Envelope Example (Success)</h2>
+                <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.85em;"><code>{
+  "status": "success",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "name": "John Doe",
+    "email": "john@example.com",
+    "phone": "+1234567890",
+    "is_active": true
+  },
+  "errors": [],
+  "message": "User created successfully"
+}</code></pre>
+
+                <h2 class="section-heading">Response Envelope Example (Error)</h2>
+                <pre style="background:#f5f5f5;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.85em;"><code>{
+  "status": "error",
+  "data": null,
+  "errors": [
+    {
+      "type": "bad-request",
+      "title": "Invalid Email",
+      "status": 400,
+      "detail": "Email 'invalid-email' does not match valid email format",
+      "field": "email"
+    }
+  ],
+  "message": "Validation failed"
+}</code></pre>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(6)">← Previous</button>
+                    <span class="progress-label">7 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(8)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 8: UI SPEC ══════════════════════ -->
+        <div id="panel-8" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 8 OF 11</div>
+                <div class="panel-title">UI Specification</div>
+                <div class="panel-desc">Pages, components, forms, validation rules, and states</div>
+            </div>
+            <div class="panel-body">
+
+                <h2 class="section-heading">Pages and Routes</h2>
+                <table class="data-table">
+                    <thead><tr><th>Route</th><th>Page Name</th><th>Components Used</th><th>Auth Required</th></tr></thead>
+                    <tbody>
+                        <tr><td>/users</td><td>Users Page</td><td>UsersView (router entry) → UsersList (grid), UserForm (create), UserUpload (modal)</td><td>Yes</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Form Fields and Validation</h2>
+                <table class="data-table">
+                    <thead><tr><th>Form</th><th>Field</th><th>Type</th><th>Required</th><th>Validation Rules</th></tr></thead>
+                    <tbody>
+                        <tr><td>Create / Update</td><td>name</td><td>text</td><td>Yes</td><td>Min 2, max 255 characters</td></tr>
+                        <tr><td>Create / Update</td><td>email</td><td>email</td><td>Yes</td><td>Valid email format; must be unique (checked server-side)</td></tr>
+                        <tr><td>Create / Update</td><td>phone</td><td>tel</td><td>Yes</td><td>Min 5, max 20 characters</td></tr>
+                        <tr><td>Create / Update</td><td>is_active</td><td>checkbox</td><td>No</td><td>Boolean; default True</td></tr>
+                        <tr><td>Upload</td><td>file</td><td>file input</td><td>Yes</td><td>Must be .xlsx or .xls file</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">UI Components & States</h2>
+                <table class="data-table">
+                    <thead><tr><th>Component</th><th>Loading State</th><th>Empty State</th><th>Error State</th></tr></thead>
+                    <tbody>
+                        <tr><td>UsersList (Syncfusion DataGrid)</td><td>Backdrop loader overlay</td><td>"No users found. Click Add to create one."</td><td>Toast with error message</td></tr>
+                        <tr><td>UserForm (React Hook Form + MUI)</td><td>Save button disabled, loader spinner</td><td>—</td><td>Red helperText on each field with validation error</td></tr>
+                        <tr><td>UserUpload (Modal Dialog)</td><td>Loader during file processing</td><td>—</td><td>Toast notification: "File must be an Excel file"</td></tr>
+                        <tr><td>AppSnackbar (Notifications)</td><td>—</td><td>—</td><td>Displays success "User created", "User updated", "User deleted", or error messages</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(7)">← Previous</button>
+                    <span class="progress-label">8 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(9)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 9: DEPENDENCIES ══════════════════════ -->
+        <div id="panel-9" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 9 OF 11</div>
+                <div class="panel-title">Dependencies and Integrations</div>
+                <div class="panel-desc">External systems, internal services, and third-party dependencies</div>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead><tr><th>Dependency</th><th>Type</th><th>Required For</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>FastAPI</td><td>Backend Framework</td><td>API routing, dependency injection</td><td>✅ Integrated</td></tr>
+                        <tr><td>SQLAlchemy 2.x</td><td>ORM</td><td>Database schema (models), future DB migration</td><td>✅ Schema reference created</td></tr>
+                        <tr><td>Pydantic</td><td>Validation</td><td>API request/response schema validation</td><td>✅ Integrated</td></tr>
+                        <tr><td>Python re module</td><td>Utility</td><td>Email regex validation</td><td>✅ Integrated</td></tr>
+                        <tr><td>openpyxl</td><td>Library</td><td>Excel file parsing for bulk import</td><td>✅ Integrated</td></tr>
+                        <tr><td>React 18</td><td>Frontend Framework</td><td>UI component rendering</td><td>✅ Integrated</td></tr>
+                        <tr><td>Next.js 14</td><td>Framework</td><td>Routing, SSR, app structure</td><td>✅ Integrated</td></tr>
+                        <tr><td>Zod</td><td>Validation</td><td>Frontend form schema validation</td><td>✅ Integrated</td></tr>
+                        <tr><td>React Hook Form</td><td>Library</td><td>Form state management, error handling</td><td>✅ Integrated</td></tr>
+                        <tr><td>Material-UI (MUI)</td><td>Component Library</td><td>UI components, theming, responsive design</td><td>✅ Integrated</td></tr>
+                        <tr><td>Syncfusion DataGrid</td><td>Component</td><td>User list display, inline editing, search, pagination</td><td>✅ Integrated</td></tr>
+                        <tr><td>Zustand</td><td>State Management</td><td>Frontend state, store, pagination metadata</td><td>✅ Integrated</td></tr>
+                        <tr><td>Axios</td><td>HTTP Client</td><td>API calls from frontend to backend</td><td>✅ Integrated</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(8)">← Previous</button>
+                    <span class="progress-label">9 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(10)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 10: RISKS ══════════════════════ -->
+        <div id="panel-10" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 10 OF 11</div>
+                <div class="panel-title">Risks and Assumptions</div>
+                <div class="panel-desc">Known risks, open questions, and assumptions being made</div>
+            </div>
+            <div class="panel-body">
+
+                <h2 class="section-heading">Technical Risks</h2>
+
+                <div class="risk-card">
+                    <div class="risk-title">Email validation bypass via crafted input</div>
+                    <div class="risk-mitigation">Mitigation: Use Pydantic EmailStr type on backend + Zod email validator on frontend. Both employ standard email regex patterns. Additional server-side confirmation email could be added in v2.</div>
+                </div>
+
+                <div class="risk-card">
+                    <div class="risk-title">Bulk import performance with large Excel files</div>
+                    <div class="risk-mitigation">Mitigation: Implement chunked processing and progress reporting. Set max file size limit (e.g., 5MB). Monitor memory usage during parsing. Consider async job queue for v2.</div>
+                </div>
+
+                <div class="risk-card">
+                    <div class="risk-title">Duplicate email race condition in concurrent creates</div>
+                    <div class="risk-mitigation">Mitigation: Database UNIQUE constraint on email column + application-level check. Use database transactions to prevent race conditions. If v2 uses actual DB, ensure unique constraint is enforced at schema level.</div>
+                </div>
+
+                <div class="risk-card">
+                    <div class="risk-title">InMemoryRepository data loss on server restart</div>
+                    <div class="risk-mitigation">Mitigation: Accepted for v1. Clear documentation that data is ephemeral. Transition to real database (SQLAlchemy + PostgreSQL/MySQL) in v2 with persistent storage.</div>
+                </div>
+
+                <h2 class="section-heading">Assumptions</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Assumption</th><th>If Wrong, Impact</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Email is the unique identifier for duplicate detection</td><td>If business logic changes to allow multiple users per email, schema and duplicate check logic must be rewritten</td></tr>
+                        <tr><td>2</td><td>All users are initially created with is_active=True unless specified</td><td>If default should be False, both backend and frontend defaults must be updated</td></tr>
+                        <tr><td>3</td><td>Phone numbers are stored as strings (no formatting)</td><td>If phone normalization is required, add a phone formatting utility to the service layer</td></tr>
+                        <tr><td>4</td><td>Users can be deleted without audit or soft delete</td><td>If compliance requires audit trail, implement soft deletes + audit log table</td></tr>
+                        <tr><td>5</td><td>Excel upload silently skips duplicate emails instead of reporting them</td><td>If detailed error reporting is required, refactor ExcelParser to return a detailed results object with success/failure counts per row</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Open Questions</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Question</th><th>Owner</th><th>Due</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Should deleted users be archived (soft delete) or permanently removed?</td><td>Product</td><td>Before v1.1</td></tr>
+                        <tr><td>2</td><td>Is there a maximum batch size for Excel import, or should we validate file size?</td><td>Product / Engineering</td><td>Before v1.0 GA</td></tr>
+                        <tr><td>3</td><td>Should email notifications be sent on user creation (welcome email)?</td><td>Product / Engineering</td><td>v2 Planning</td></tr>
+                        <tr><td>4</td><td>Will RBAC (role-based access control) be added in v1.1 or later?</td><td>Product</td><td>v2 Planning</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(9)">← Previous</button>
+                    <span class="progress-label">10 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(11)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ══════════════════════ PANEL 11: DEFINITION OF DONE ══════════════════════ -->
+        <div id="panel-11" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 11 OF 11</div>
+                <div class="panel-title">Definition of Done</div>
+                <div class="panel-desc">Checklist — every item must be complete before the feature ships</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The User feature is considered complete only when ALL items below are checked off.</div>
+
+                <h2 class="section-heading">Backend</h2>
+                <ul class="dod-list">
+                    <li><span class="dod-check"></span>All 6 API endpoints implemented (POST create, GET list, GET by ID, PUT update, DELETE, POST upload)</li>
+                    <li><span class="dod-check"></span>Pydantic schemas defined: CreateUserSchema, UpdateUserSchema, UserResponse</li>
+                    <li><span class="dod-check"></span>Email validation (regex) enforced in service layer</li>
+                    <li><span class="dod-check"></span>Duplicate email check implemented with DuplicateEmailError exception</li>
+                    <li><span class="dod-check"></span>All field constraints validated: name 2–255, phone 5–20</li>
+                    <li><span class="dod-check"></span>InMemoryRepository fully implemented with sample data</li>
+                    <li><span class="dod-check"></span>UserService orchestrates business logic</li>
+                    <li><span class="dod-check"></span>Excel parser supports .xlsx/.xls files</li>
+                    <li><span class="dod-check"></span>Standard response envelope returned from all endpoints</li>
+                    <li><span class="dod-check"></span>HTTP status codes correct (201 create, 200 success, 400 validation, 404 not found)</li>
+                    <li><span class="dod-check"></span>All domain exceptions properly mapped to HTTPExceptions</li>
+                    <li><span class="dod-check"></span>No stack traces exposed in error responses</li>
+                    <li><span class="dod-check"></span>ORM model file created: UserModel in infrastructure/models/</li>
+                    <li><span class="dod-check"></span>Router registered in app/main.py</li>
+                    <li><span class="dod-check"></span>Google-style docstrings on all public functions and classes</li>
+                    <li><span class="dod-check"></span>isort, black, flake8, mypy all pass</li>
+                </ul>
+
+                <h2 class="section-heading">Frontend</h2>
+                <ul class="dod-list">
+                    <li><span class="dod-check"></span>DTOs defined: UserDto, CreateUserDto, UpdateUserDto</li>
+                    <li><span class="dod-check"></span>Zod schemas: createUserSchema, updateUserSchema</li>
+                    <li><span class="dod-check"></span>Mappers: CreateUserMapper, UpdateUserMapper</li>
+                    <li><span class="dod-check"></span>API client (userApi) calls all 6 endpoints</li>
+                    <li><span class="dod-check"></span>Services: createUserService, updateUserService, deleteUserService, getUsersService, uploadUsersService</li>
+                    <li><span class="dod-check"></span>Zustand store: userState.ts + userStore.ts with pagination, errors, loading, success flags</li>
+                    <li><span class="dod-check"></span>UI components: UsersList (Syncfusion DataGrid), UserForm (create/edit), UserUpload (modal)</li>
+                    <li><span class="dod-check"></span>UsersView component integrates all UI components</li>
+                    <li><span class="dod-check"></span>Routes: /app/users/page.tsx imports UsersView</li>
+                    <li><span class="dod-check"></span>Syncfusion DataGrid configured with inline edit, search, pagination, add/edit/delete toolbar buttons</li>
+                    <li><span class="dod-check"></span>Form validation with React Hook Form + Zod</li>
+                    <li><span class="dod-check"></span>Field-level error display in form helperText</li>
+                    <li><span class="dod-check"></span>AppSnackbar displays success, update, delete, and error messages</li>
+                    <li><span class="dod-check"></span>Loading state with Backdrop during async operations</li>
+                    <li><span class="dod-check"></span>Empty state message when no users</li>
+                    <li><span class="dod-check"></span>Refresh button above grid for manual data reload</li>
+                    <li><span class="dod-check"></span>JSDoc on all functions and components</li>
+                    <li><span class="dod-check"></span>Prettier, ESLint, TypeScript strict mode all pass</li>
+                </ul>
+
+                <h2 class="section-heading">Documentation & Testing</h2>
+                <ul class="dod-list">
+                    <li><span class="dod-check"></span>PRD document complete with all 11 sections (this file)</li>
+                    <li><span class="dod-check"></span>User flow diagrams generated with /userflow command</li>
+                    <li><span class="dod-check"></span>API routes documented with docstrings</li>
+                    <li><span class="dod-check"></span>Database schema documented (UserModel)</li>
+                    <li><span class="dod-check"></span>All user stories have passing acceptance criteria</li>
+                    <li><span class="dod-check"></span>Manual QA: Create, list, get, update, delete, upload flows tested in browser</li>
+                    <li><span class="dod-check"></span>Edge cases tested: invalid email, duplicate email, name too short, empty upload</li>
+                </ul>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(10)">← Previous</button>
+                    <span class="progress-label">11 of 11</span>
+                    <button class="arrow-btn" disabled>Next →</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+    const rendered = new Set();
+    async function renderMermaid(id) {
+        if (rendered.has(id)) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        try { await mermaid.run({ nodes: [el] }); rendered.add(id); }
+        catch(e) { el.innerHTML = '<div style="color:#dc2626;padding:16px">ERD render error: ' + e.message + '</div>'; }
+    }
+    window._mermaidRender = renderMermaid;
+</script>
+
+<script>
+    let currentPanel = 1;
+
+    async function showPanel(n) {
+        document.getElementById('panel-' + currentPanel).classList.remove('active');
+        document.querySelectorAll('.nav-btn')[currentPanel - 1].classList.remove('active');
+        document.getElementById('panel-' + n).classList.add('active');
+        document.querySelectorAll('.nav-btn')[n - 1].classList.add('active');
+        currentPanel = n;
+        if (n === 6 && window._mermaidRender) await window._mermaidRender('m-erd');
+        document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.showPanel = showPanel;
+</script>
+</body>
+</html>

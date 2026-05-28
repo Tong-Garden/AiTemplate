@@ -367,49 +367,97 @@ Custom slash commands available in Claude chat (defined in `.claude/commands/`).
 
 | Command | Usage | Description |
 |---|---|---|
-| `/pre-submit` | `/pre-submit <feature>` | Checks a feature for missing ORM model files and SQLAlchemy view files. Creates any that are missing. |
-| `/prd` | `/prd <feature>` | Generates a complete interactive PRD HTML file by reading entities, endpoints, and UI components from the codebase. |
-| `/userflow` | `/userflow <feature>` | Generates an interactive user flow HTML file with Mermaid diagrams covering all major user journeys. |
+| `/pre-submit` | `/pre-submit` or `/pre-submit <feature1>, <feature2>` | Checks one or more features for missing ORM model files and SQLAlchemy view files. Supports single or multiple features. Shows feature selection UI if none specified. |
+| `/prd` | `/prd` or `/prd <feature1>, <feature2>` | Generates complete interactive PRD HTML files by reading entities, endpoints, and UI components. Supports single or multiple features. Shows feature selection UI if none specified. |
+| `/userflow` | `/userflow` or `/userflow <feature1>, <feature2>` | Generates interactive user flow HTML files with Mermaid diagrams. Supports single or multiple features. Shows feature selection UI if none specified. |
 
-### `/pre-submit <feature>`
+### `/pre-submit [features]`
 
-Validates that every domain entity in a feature has the correct database artefact:
+Validates that every domain entity in one or **multiple** features has the correct database artefact:
 - **STORED** entities → `infrastructure/models/<entity>_model.py` (or `_header_model.py` / `_line_model.py` for header-line pairs)
 - **DERIVED / VIEW** entities (have their own `list_<entity>()` repo method) → `infrastructure/views/<entity>_view.py`
 - **DERIVED / INTERNAL** entities (inline helpers with no dedicated repo method) → skipped, nothing created
 
+**Single feature:**
 ```
 /pre-submit grn
-/pre-submit purchase_order
 ```
 
-Output: a summary table showing each entity, its classification, and the file status (`✅ exists` / `❌ created` / `⏭ skipped`).
+**Multiple features (comma-separated):**
+```
+/pre-submit grn, purchase_order, inventory
+```
+
+**No features specified (shows selection UI):**
+```
+/pre-submit
+```
+
+Output: a summary table for **each feature** showing entity classification and file status (`✅ exists` / `❌ created` / `⏭ skipped`).
+
+**Example output for multiple features:**
+```
+📊 Pre-Submit Validation Complete!
+
+✅ GRN (3 entities)
+   ✅ id → infrastructure/models/grn_model.py
+   ✅ grn_line_item → infrastructure/models/grn_line_item_model.py
+   ✅ grn_summary → infrastructure/views/grn_summary_view.py
+
+✅ Purchase Order (4 entities)
+   ✅ po_header → infrastructure/models/po_header_model.py
+   ✅ po_line → infrastructure/models/po_line_model.py
+   ✅ po_summary → infrastructure/views/po_summary_view.py
+   ✅ po_status → infrastructure/models/po_status_model.py
+
+✅ All 7 entities validated and ready!
+```
 
 ---
 
-### `/prd <feature>`
+### `/prd [features]`
 
-Reads the full feature stack (domain, models, API routes, frontend components) and generates a styled 11-section PRD as a standalone HTML file.
+Reads the full feature stack (domain, models, API routes, frontend components) and generates a styled 11-section PRD as a standalone HTML file. **Supports single or multiple features.**
 
+**Single feature:**
 ```
 /prd grn
-/prd purchase_order
 ```
 
-Output: `docs/prd/<Feature>/<FEATURE>_PRD.html`
+**Multiple features:**
+```
+/prd grn, purchase_order, inventory
+```
+
+**No features specified (shows selection UI):**
+```
+/prd
+```
+
+Output: `docs/prd/<Feature>/<FEATURE>_PRD.html` (one file per feature)
 
 ---
 
-### `/userflow <feature>`
+### `/userflow [features]`
 
-Reads the feature codebase and generates a sidebar-navigated HTML file with at least 10 Mermaid diagrams (main flow, create, status lifecycle, edit, delete, list, filter, detail view, error handling, architecture).
+Reads the feature codebase and generates a sidebar-navigated HTML file with at least 10 Mermaid diagrams (main flow, create, status lifecycle, edit, delete, list, filter, detail view, error handling, architecture). **Supports single or multiple features.**
 
+**Single feature:**
 ```
 /userflow grn
-/userflow purchase_order
 ```
 
-Output: `docs/flows/<Feature>/<FEATURE>_USER_FLOWS.html`
+**Multiple features:**
+```
+/userflow grn, purchase_order, inventory
+```
+
+**No features specified (shows selection UI):**
+```
+/userflow
+```
+
+Output: `docs/flows/<Feature>/<FEATURE>_USER_FLOWS.html` (one file per feature)
 
 ---
 

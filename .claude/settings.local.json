@@ -99,7 +99,15 @@
       "Bash(node -e \"const archiver = require\\('archiver'\\); const z = new archiver.Archiver\\('zip', {}\\); console.log\\('Created archiver:', typeof z\\);\")",
       "Bash(node -e ' *)",
       "Bash(ls -lh \"D:\\\\\\\\AiTemplate\\\\\\\\AiTemplate-clean.zip\")",
-      "Bash(unzip -l \"D:\\\\\\\\AiTemplate\\\\\\\\AiTemplate-clean.zip\")"
+      "Bash(unzip -l \"D:\\\\\\\\AiTemplate\\\\\\\\AiTemplate-clean.zip\")",
+      "Bash(find \"D:\\\\\\\\AiTemplate\" -name \"*submit*\" -type f)",
+      "Bash(ls -la \"D:\\\\\\\\AiTemplate\\\\\\\\backend\\\\\\\\app\\\\\\\\features\\\\\\\\\")",
+      "Bash(awk '{print $NF}')",
+      "Bash(grep -v \"^\\\\.\\\\.\\\\\\\\?$\")",
+      "Bash(Get-ChildItem -Path \"backend/app/features\" -Directory)",
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Sort-Object)",
+      "Bash(xargs -n1 basename)"
     ]
   }
 }
