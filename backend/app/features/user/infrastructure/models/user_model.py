@@ -4,6 +4,7 @@ Schema reference only — NOT wired up. App uses InMemoryRepository.
 """
 
 from datetime import datetime
+
 from sqlalchemy import String, func
 from sqlalchemy.orm import Mapped, mapped_column
 

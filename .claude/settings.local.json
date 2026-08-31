@@ -107,7 +107,13 @@
       "Bash(Get-ChildItem -Path \"backend/app/features\" -Directory)",
       "Bash(Select-Object -ExpandProperty Name)",
       "Bash(Sort-Object)",
-      "Bash(xargs -n1 basename)"
+      "Bash(xargs -n1 basename)",
+      "Bash(gh project *)",
+      "PowerShell(gh project list --owner Tong-Garden 2>&1)",
+      "Bash(python scripts/zip_project.py --list)",
+      "Bash(python scripts/zip_project.py --features user)",
+      "Bash(python scripts/zip_project.py --features user,dashboard)",
+      "Bash(rm -f D:\\\\AiTemplate\\\\AiTemplate-*.zip && ls -la D:\\\\AiTemplate\\\\AiTemplate-*.zip 2>/dev/null || echo \"✅ Test zips cleaned up\")"
     ]
   }
 }

@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User User Flows</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+            min-height: 100vh;
+        }
+        .header {
+            background: linear-gradient(135deg, #1f2937, #374151);
+            color: #fff;
+            padding: 40px 32px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .header-text h1 { font-size: 2em; font-weight: 700; letter-spacing: -0.02em; }
+        .header-text p  { margin-top: 6px; opacity: 0.75; font-size: 0.97em; }
+        .stats-bar {
+            background: #1e3a5f;
+            display: flex;
+            justify-content: center;
+            gap: 0;
+        }
+        .stat {
+            padding: 14px 40px;
+            text-align: center;
+            border-right: 1px solid rgba(255,255,255,0.1);
+        }
+        .stat:last-child { border-right: none; }
+        .stat-num  { font-size: 1.5em; font-weight: 700; color: #60a5fa; }
+        .stat-lbl  { font-size: 0.75em; color: rgba(255,255,255,0.6); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .layout { display: flex; min-height: calc(100vh - 160px); }
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            background: #fff;
+            border-right: 1px solid #e5e7eb;
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+        .sidebar-title {
+            font-size: 0.7em;
+            font-weight: 700;
+            color: #9ca3af;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 0 16px 12px;
+        }
+        .tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.88em;
+            color: #4b5563;
+            text-align: left;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+        }
+        .tab-btn:hover { background: #f9fafb; color: #1a202c; }
+        .tab-btn.active {
+            background: #eff6ff;
+            color: #2563eb;
+            font-weight: 600;
+            border-left-color: #3b82f6;
+        }
+        .tab-num {
+            width: 22px; height: 22px;
+            border-radius: 6px;
+            background: #f0f1f3;
+            font-size: 0.78em;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #6b7280;
+        }
+        .tab-btn.active .tab-num { background: #3b82f6; color: white; }
+        .main { flex: 1; padding: 32px; overflow: auto; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .panel-header {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            border-radius: 12px 12px 0 0;
+            padding: 24px 28px;
+            color: white;
+        }
+        .panel-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.18);
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            margin-bottom: 10px;
+        }
+        .panel-title { font-size: 1.7em; font-weight: 700; margin-bottom: 6px; }
+        .panel-desc  { opacity: 0.85; font-size: 0.95em; }
+        .panel-body {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            padding: 28px;
+        }
+        .info-box {
+            background: #eff6ff;
+            border-left: 4px solid #3b82f6;
+            padding: 14px 18px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 28px;
+            font-size: 0.93em;
+            color: #1e3a8a;
+            line-height: 1.65;
+        }
+        .mermaid-box {
+            background: #fafbfc;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 40px 20px;
+            min-height: 320px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow-x: auto;
+        }
+        .mermaid-box .mermaid { width: 100%; display: flex; justify-content: center; }
+        .mermaid-box svg { max-width: 100%; height: auto; min-height: 260px; }
+        .nav-arrows {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .arrow-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: 1px solid #e5e7eb;
+            background: #fff;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.88em;
+            font-weight: 500;
+            color: #374151;
+            transition: all 0.15s;
+        }
+        .arrow-btn:hover { background: #f9fafb; border-color: #3b82f6; color: #2563eb; }
+        .arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .progress-label { font-size: 0.85em; color: #6b7280; }
+        @media (max-width: 768px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; display: flex; flex-wrap: wrap; padding: 10px; gap: 6px; }
+            .tab-btn { width: auto; padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 6px; border-left: 3px solid transparent; }
+            .stats-bar { flex-wrap: wrap; }
+            .stat { padding: 10px 20px; }
+            .main { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="font-size:3em;">👤</div>
+    <div class="header-text">
+        <h1>User Management User Flows</h1>
+        <p>Complete visual guide to user management system interactions and architecture</p>
+    </div>
+</div>
+
+<div class="stats-bar">
+    <div class="stat"><div class="stat-num">11</div><div class="stat-lbl">Flow Diagrams</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">Statuses</div></div>
+    <div class="stat"><div class="stat-num">1</div><div class="stat-lbl">User Role</div></div>
+    <div class="stat"><div class="stat-num">6</div><div class="stat-lbl">API Endpoints</div></div>
+</div>
+
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-title">Flow Diagrams</div>
+        <button class="tab-btn active" onclick="showPanel(1)"><span class="tab-num">1</span> Main Overview</button>
+        <button class="tab-btn" onclick="showPanel(2)"><span class="tab-num">2</span> Create User</button>
+        <button class="tab-btn" onclick="showPanel(3)"><span class="tab-num">3</span> List & Pagination</button>
+        <button class="tab-btn" onclick="showPanel(4)"><span class="tab-num">4</span> Search/Filter</button>
+        <button class="tab-btn" onclick="showPanel(5)"><span class="tab-num">5</span> View Details</button>
+        <button class="tab-btn" onclick="showPanel(6)"><span class="tab-num">6</span> Edit User</button>
+        <button class="tab-btn" onclick="showPanel(7)"><span class="tab-num">7</span> Toggle Active</button>
+        <button class="tab-btn" onclick="showPanel(8)"><span class="tab-num">8</span> Delete User</button>
+        <button class="tab-btn" onclick="showPanel(9)"><span class="tab-num">9</span> Bulk Upload</button>
+        <button class="tab-btn" onclick="showPanel(10)"><span class="tab-num">10</span> Error Handling</button>
+        <button class="tab-btn" onclick="showPanel(11)"><span class="tab-num">11</span> System Architecture</button>
+    </nav>
+
+    <main class="main">
+
+        <!-- PANEL 1: Main Overview -->
+        <div id="panel-1" class="panel active">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 1 OF 11</div>
+                <div class="panel-title">Main Overview</div>
+                <div class="panel-desc">High-level navigation paths for all user management operations</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">System administrator enters the User Management module and can choose to create new users, view the user list, or perform bulk operations. This diagram shows all primary entry points and navigation paths.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m1">
+graph TD
+    A[Admin Opens Module] --> B{Action?}
+    B -->|Create New| C[Create User Form]
+    B -->|View All| D[User List]
+    B -->|Bulk Import| E[Upload Dialog]
+    C --> F[Submit]
+    D --> G{Select User?}
+    G -->|View| H[User Details]
+    G -->|Edit| I[Edit Form]
+    G -->|Delete| J[Confirm Delete]
+    H --> K[Back to List]
+    I --> L[Update]
+    J --> M[User Removed]
+    E --> N[File Uploaded]
+    F --> O[User Created]
+    L --> P[User Updated]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" disabled>← Previous</button>
+                    <span class="progress-label">1 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(2)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 2: Create User -->
+        <div id="panel-2" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 2 OF 11</div>
+                <div class="panel-title">Create User Flow</div>
+                <div class="panel-desc">Complete sequence for creating a new user account with validation</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator fills out the Create User form with name, email, phone, and active status. Form validates input, checks for duplicate emails, then submits to the backend API. Success returns the new user with auto-generated ID; failure returns validation errors.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m2">
+graph TD
+    A[Open Create Form] --> B[Fill Name]
+    B --> C[Fill Email]
+    C --> D[Fill Phone]
+    D --> E[Set Active Status]
+    E --> F[Click Create]
+    F --> G{Validate Form}
+    G -->|Invalid| H[Show Field Errors]
+    H --> I[User Corrects]
+    I --> F
+    G -->|Valid| J[POST /v1/users]
+    J --> K{Server Response}
+    K -->|Duplicate Email| L[Show Error Toast]
+    K -->|Invalid Email| M[Show Error Toast]
+    K -->|Name Too Short| N[Show Error Toast]
+    K -->|Success| O[Return User]
+    O --> P[Reset Form]
+    P --> Q[Show Success Toast]
+    L --> R[Return to Form]
+    M --> R
+    N --> R
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(1)">← Previous</button>
+                    <span class="progress-label">2 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(3)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 3: List & Pagination -->
+        <div id="panel-3" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 3 OF 11</div>
+                <div class="panel-title">List and Pagination Flow</div>
+                <div class="panel-desc">Displaying users with pagination controls and data grid</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator loads the Users page showing a Syncfusion DataGrid with all users. API returns paginated results (default 20 per page). Grid displays pagination controls (Previous, Next, page indicator). Administrator can navigate between pages, change limit, or perform inline actions on each row.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m3">
+graph TD
+    A[Load Users Page] --> B[GET /v1/users?page=1]
+    B --> C[Parse Response]
+    C --> D[Store in Zustand]
+    D --> E[Render DataGrid]
+    E --> F[Show Pagination Meta]
+    F --> G{User Action?}
+    G -->|Next Page| H[page++]
+    G -->|Prev Page| I[page--]
+    G -->|Change Limit| J[limit=N]
+    G -->|No Action| K[View Users]
+    H --> L[Fetch page N+1]
+    I --> M[Fetch page N-1]
+    J --> N[Reset to page 1]
+    L --> O[Update Grid]
+    M --> O
+    N --> P[Fetch with new limit]
+    P --> O
+    K --> E
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(2)">← Previous</button>
+                    <span class="progress-label">3 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(4)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 4: Search/Filter -->
+        <div id="panel-4" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 4 OF 11</div>
+                <div class="panel-title">Search and Filter Flow</div>
+                <div class="panel-desc">Real-time search functionality in the DataGrid</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator uses the Syncfusion DataGrid Search toolbar to filter users by name, email, or phone. Search is performed client-side on the current page results or server-side if filtering all data. Results update in real-time as user types.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m4">
+graph LR
+    A[Type in Search] --> B{Query}
+    B -->|Empty| C[Show All Users]
+    B -->|Has Text| D[Filter Grid Rows]
+    D --> E{Match?}
+    E -->|Name Match| F[Include Row]
+    E -->|Email Match| G[Include Row]
+    E -->|Phone Match| H[Include Row]
+    E -->|No Match| I[Hide Row]
+    F --> J[Render Results]
+    G --> J
+    H --> J
+    C --> J
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(3)">← Previous</button>
+                    <span class="progress-label">4 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(5)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 5: View Details -->
+        <div id="panel-5" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 5 OF 11</div>
+                <div class="panel-title">View User Details Flow</div>
+                <div class="panel-desc">Retrieving and displaying full user information</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator clicks on a user row or detail button to view complete user information: ID, name, email, phone, is_active, created_at, updated_at. API fetches user by ID, returns full object, displayed in detail view with action buttons (Edit, Delete, Back).</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m5">
+graph TD
+    A[Click User Row] --> B[Get User ID]
+    B --> C[GET /v1/users/id]
+    C --> D{Response}
+    D -->|404 Not Found| E[Show Error]
+    D -->|User Found| F[Display All Fields]
+    F --> G[ID: ...]
+    F --> H[Name: ...]
+    F --> I[Email: ...]
+    F --> J[Phone: ...]
+    F --> K[Active: ...]
+    F --> L[Created: ...]
+    F --> M[Updated: ...]
+    G --> N[Show Actions]
+    H --> N
+    I --> N
+    J --> N
+    K --> N
+    L --> N
+    M --> N
+    N --> O{Action?}
+    O -->|Edit| P[Go to Edit]
+    O -->|Delete| Q[Go to Delete]
+    O -->|Back| R[Return to List]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(4)">← Previous</button>
+                    <span class="progress-label">5 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(6)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 6: Edit User -->
+        <div id="panel-6" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 6 OF 11</div>
+                <div class="panel-title">Edit User Flow</div>
+                <div class="panel-desc">In-line or form-based editing of user details</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator double-clicks a row (inline edit) or opens edit form to modify user details. Changes are validated in real-time. On save, PUT request is sent to backend with optional fields. Success returns updated user and shows toast confirmation; failure displays field errors.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m6">
+graph TD
+    A[Double Click Row / Edit Button] --> B[Enter Edit Mode]
+    B --> C[Load Current Data]
+    C --> D{Edit What?}
+    D -->|Name| E[Change Name]
+    D -->|Email| F[Change Email]
+    D -->|Phone| G[Change Phone]
+    D -->|Active| H[Toggle Active]
+    E --> I[Validate Fields]
+    F --> I
+    G --> I
+    H --> I
+    I --> J{Valid?}
+    J -->|Invalid| K[Show Field Error]
+    K --> L[User Fixes]
+    L --> I
+    J -->|Valid| M[Click Save]
+    M --> N[PUT /v1/users/id]
+    N --> O{Server Response}
+    O -->|Duplicate Email| P[Show Error Toast]
+    O -->|Validation Error| Q[Show Field Errors]
+    O -->|Success| R[Update Grid Row]
+    R --> S[Show Success Toast]
+    P --> T[User Retries]
+    Q --> T
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(5)">← Previous</button>
+                    <span class="progress-label">6 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(7)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 7: Toggle Active -->
+        <div id="panel-7" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 7 OF 11</div>
+                <div class="panel-title">Toggle Active Status Flow</div>
+                <div class="panel-desc">Quick activation/deactivation of user accounts</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator clicks the is_active checkbox in the DataGrid to toggle user account status between active and inactive. In inline edit mode, changes persist immediately on save. No additional confirmation required; status updates reflect in the grid instantly.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m7">
+graph TD
+    A[View DataGrid] --> B[User Checkbox]
+    B --> C{Inline Edit?}
+    C -->|Yes| D[Click Checkbox]
+    C -->|No| E[Double Click Row]
+    D --> F[is_active Toggles]
+    E --> G[Enter Edit Mode]
+    G --> H[Click Checkbox]
+    H --> I[is_active Toggles]
+    F --> J[Click Save]
+    I --> K[Click Save]
+    J --> L[PUT /v1/users/id]
+    K --> L
+    L --> M{Response}
+    M -->|Success| N[Update Grid]
+    M -->|Error| O[Show Error Toast]
+    N --> P[Checkbox Reflects New Value]
+    O --> Q[Revert Checkbox]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(6)">← Previous</button>
+                    <span class="progress-label">7 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(8)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 8: Delete User -->
+        <div id="panel-8" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 8 OF 11</div>
+                <div class="panel-title">Delete User Flow</div>
+                <div class="panel-desc">Safe deletion of user accounts with implicit confirmation</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator clicks delete icon on a user row in the DataGrid. DELETE request is sent to backend with the user ID. Success removes the user from the database and updates the grid; failure displays error toast. User data is permanently removed (no soft delete in v1).</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m8">
+graph TD
+                    A[View DataGrid] --> B[Click Delete Icon]
+                    B --> C[Get User ID]
+                    C --> D[Disable Button]
+                    D --> E[DELETE /v1/users/id]
+                    E --> F{Response}
+                    F -->|404 Not Found| G[Show Error Toast]
+                    F -->|Success| H[Remove Row from Grid]
+                    G --> I[Re-enable Button]
+                    H --> J[Show Success Toast]
+                    J --> K[Grid Refreshes]
+                    K --> L[Count Updates]
+                    I --> M[User Retries]
+                    M --> E
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(7)">← Previous</button>
+                    <span class="progress-label">8 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(9)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 9: Bulk Upload -->
+        <div id="panel-9" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 9 OF 11</div>
+                <div class="panel-title">Bulk Upload Flow</div>
+                <div class="panel-desc">Importing multiple users from an Excel file</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Administrator clicks the Upload button, selects a .xlsx/.xls file, and submits. Frontend validates file type. Backend parses Excel, creates users with skipped duplicates. API returns count of successfully imported users. Toast confirms import with count and skipped duplicates are silently ignored.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m9">
+graph TD
+                    A[Click Upload Button] --> B[Open File Dialog]
+                    B --> C{Select File}
+                    C -->|Cancel| D[Close Dialog]
+                    C -->|File Selected| E{Valid Type?}
+                    E -->|Not Excel| F[Show Error]
+                    E -->|Excel File| G[Show Loading]
+                    F --> H[User Retries]
+                    H --> B
+                    G --> I[POST /v1/users/upload]
+                    I --> J[Backend Parse Excel]
+                    J --> K[Loop Rows]
+                    K --> L{Email Exists?}
+                    L -->|Yes| M[Skip Row]
+                    L -->|No| N[Create User]
+                    M --> O[Count Skipped]
+                    N --> P[Count Created]
+                    O --> Q[Return Result]
+                    P --> Q
+                    Q --> R{Response}
+                    R -->|Success| S[Show Toast N Imported]
+                    R -->|Error| T[Show Error Toast]
+                    S --> U[Refresh Grid]
+                    T --> V[Hide Loading]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(8)">← Previous</button>
+                    <span class="progress-label">9 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(10)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 10: Error Handling -->
+        <div id="panel-10" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 10 OF 11</div>
+                <div class="panel-title">Error Handling Flow</div>
+                <div class="panel-desc">All error scenarios and how they surface to the user</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The system handles multiple error types: validation errors (form field level), business logic errors (duplicate email, not found), and server errors. All are caught, parsed into structured error objects, and displayed appropriately: field errors in forms, general errors in toasts, and no stack traces exposed to the user.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m10">
+graph TD
+                    A[API Request] --> B{Error?}
+                    B -->|No Error| C[Success Response]
+                    B -->|HTTP Error| D{Status Code}
+                    D -->|400| E[Validation Error]
+                    D -->|404| F[Not Found Error]
+                    D -->|409| G[Conflict Error]
+                    D -->|500| H[Server Error]
+                    E --> I{Field Error?}
+                    I -->|Yes| J[Extract field name]
+                    I -->|No| K[Extract detail]
+                    J --> L[Set fieldErrors]
+                    K --> M[Set error state]
+                    L --> N[Show in Form]
+                    M --> O[Show in Toast]
+                    F --> P[User Not Found]
+                    P --> Q[Show Error Toast]
+                    G --> R[Duplicate Email]
+                    R --> S[Show Error Toast]
+                    H --> T[Server Error]
+                    T --> U[Show Error Toast]
+                    N --> V[User Corrects]
+                    O --> W[User Retries]
+                    Q --> W
+                    S --> W
+                    U --> W
+                    C --> X[Clear Errors]
+                    X --> Y[Show Success]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(9)">← Previous</button>
+                    <span class="progress-label">10 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(11)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL 11: System Architecture -->
+        <div id="panel-11" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 11 OF 11</div>
+                <div class="panel-title">System Architecture and Data Flow</div>
+                <div class="panel-desc">Full-stack architecture: Frontend React UI, Zustand store, services, API client, backend FastAPI, domain logic, repositories, database schema</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Complete system architecture showing all layers from React UI through backend domain logic. Data flows: UI dispatches actions to Zustand store → services validate and map → API client makes HTTP calls → FastAPI routers handle requests → services execute business logic → repositories persist data. Response data flows back through mappers to store to UI.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m11">
+graph TD
+                    A[React UI] -->|User Action| B[Zustand Store]
+                    B -->|Call Service| C[Service Layer]
+                    C -->|Validate & Map| D[API Client]
+                    D -->|HTTP| E[FastAPI Router]
+                    E -->|Extract & Validate| F[Pydantic Schemas]
+                    F -->|Inject Service| G[Domain Service]
+                    G -->|Business Logic| H[Domain Entity]
+                    H -->|Persist| I[Repository]
+                    I -->|Query/Write| J[In-Memory Store]
+                    J -->|Response| I
+                    I -->|Domain Entity| G
+                    G -->|Response DTO| F
+                    F -->|Response| E
+                    E -->|HTTP Response| D
+                    D -->|Response Data| C
+                    C -->|Update State| B
+                    B -->|Re-render| A
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(10)">← Previous</button>
+                    <span class="progress-label">11 of 11</span>
+                    <button class="arrow-btn" disabled>Next →</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: true, htmlLabels: false, curve: 'basis' },
+        sequence: { useMaxWidth: true }
+    });
+
+    const rendered = new Set();
+
+    async function renderPanel(id) {
+        if (rendered.has(id)) return;
+        const el = document.getElementById('m' + id);
+        if (!el) return;
+        try {
+            await mermaid.run({ nodes: [el] });
+            rendered.add(id);
+        } catch(e) {
+            el.innerHTML = '<div style="color:#dc2626;padding:20px;text-align:center;">Render error: ' + e.message + '</div>';
+        }
+    }
+
+    window._mermaidRender = renderPanel;
+    renderPanel(1);
+</script>
+
+<script>
+    let currentPanel = 1;
+
+    async function showPanel(n) {
+        document.getElementById('panel-' + currentPanel).classList.remove('active');
+        document.querySelectorAll('.tab-btn')[currentPanel - 1].classList.remove('active');
+        document.getElementById('panel-' + n).classList.add('active');
+        document.querySelectorAll('.tab-btn')[n - 1].classList.add('active');
+        currentPanel = n;
+        if (window._mermaidRender) await window._mermaidRender(n);
+        document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.showPanel = showPanel;
+</script>
+</body>
+</html>
