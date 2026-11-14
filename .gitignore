@@ -9,3 +9,6 @@ __pycache__/
 .idea/
 dist/
 build/
+
+# Claude /task working plans (deleted when work is done)
+docs/plans/
