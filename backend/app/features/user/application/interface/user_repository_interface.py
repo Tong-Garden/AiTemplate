@@ -1,4 +1,5 @@
-from typing import List, Optional, Protocol
+import builtins
+from typing import Protocol
 
 from ...domain import User
 
@@ -10,16 +11,16 @@ class UserRepositoryInterface(Protocol):
         """Create and persist a user."""
         ...
 
-    async def get_by_id(self, user_id: str) -> Optional[User]:
+    async def get_by_id(self, user_id: str) -> User | None:
         """Retrieve user by ID."""
         ...
 
-    async def get_by_email(self, email: str) -> Optional[User]:
+    async def get_by_email(self, email: str) -> User | None:
         """Retrieve user by email."""
         ...
 
-    async def list_all(self) -> List[User]:
-        """List all users."""
+    async def list(self, offset: int, limit: int) -> tuple[builtins.list[User], int]:
+        """Return one page of users and the total number stored."""
         ...
 
     async def update(self, user: User) -> User:
@@ -30,7 +31,7 @@ class UserRepositoryInterface(Protocol):
         """Delete user by ID."""
         ...
 
-    async def load_users(self, users: List[User]) -> None:
+    async def load_users(self, users: builtins.list[User]) -> None:
         """Load multiple users (for initialization/testing)."""
         ...
 

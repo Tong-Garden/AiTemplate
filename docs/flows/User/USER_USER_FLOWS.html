@@ -302,15 +302,15 @@ graph TD
                 <div class="panel-desc">Displaying users with pagination controls and data grid</div>
             </div>
             <div class="panel-body">
-                <div class="info-box">Administrator loads the Users page showing a Syncfusion DataGrid with all users. API returns paginated results (default 20 per page). Grid displays pagination controls (Previous, Next, page indicator). Administrator can navigate between pages, change limit, or perform inline actions on each row.</div>
+                <div class="info-box">Administrator loads the Users page showing a Syncfusion DataGrid with one server-side page of users. The API takes page and limit (default 1 and 20, limit 1 to 100) and returns meta with the totals. The footer shows an X of Y total indicator, Previous and Next buttons, MUI Pagination and a page-size select. Changing the page size returns to page 1, and deleting the last row of a page steps back one page.</div>
                 <div class="mermaid-box">
                     <div class="mermaid" id="m3">
 graph TD
-    A[Load Users Page] --> B[GET /v1/users?page=1]
+    A[Load Users Page] --> B[GET /v1/users with page and limit]
     B --> C[Parse Response]
-    C --> D[Store in Zustand]
+    C --> D[Store users and meta in Zustand]
     D --> E[Render DataGrid]
-    E --> F[Show Pagination Meta]
+    E --> F[Show X of Y total and page controls]
     F --> G{User Action?}
     G -->|Next Page| H[page++]
     G -->|Prev Page| I[page--]
@@ -541,7 +541,7 @@ graph TD
                 <div class="panel-desc">Importing multiple users from an Excel file</div>
             </div>
             <div class="panel-body">
-                <div class="info-box">Administrator clicks the Upload button, selects a .xlsx/.xls file, and submits. Frontend validates file type. Backend parses Excel, creates users with skipped duplicates. API returns count of successfully imported users. Toast confirms import with count and skipped duplicates are silently ignored.</div>
+                <div class="info-box">Administrator clicks the Upload button, selects a .xlsx/.xls file, and submits. Frontend validates the file type. Backend rejects files over 5 MB or unreadable workbooks with a 400 bad-request, otherwise parses the sheet, skips rows with invalid fields or an existing email, and stores each remaining row with its own id and the status column as is_active. The API returns data.count and a snackbar shows the imported count while the grid reloads the current page.</div>
                 <div class="mermaid-box">
                     <div class="mermaid" id="m9">
 graph TD
@@ -555,18 +555,20 @@ graph TD
                     H --> B
                     G --> I[POST /v1/users/upload]
                     I --> J[Backend Parse Excel]
-                    J --> K[Loop Rows]
-                    K --> L{Email Exists?}
-                    L -->|Yes| M[Skip Row]
-                    L -->|No| N[Create User]
+                    J --> J2{Size and file valid?}
+                    J2 -->|No| T
+                    J2 -->|Yes| K[Loop Rows]
+                    K --> L{Row valid and email new?}
+                    L -->|No| M[Skip Row]
+                    L -->|Yes| N[Create User with new id]
                     M --> O[Count Skipped]
                     N --> P[Count Created]
                     O --> Q[Return Result]
                     P --> Q
                     Q --> R{Response}
-                    R -->|Success| S[Show Toast N Imported]
-                    R -->|Error| T[Show Error Toast]
-                    S --> U[Refresh Grid]
+                    R -->|Success| S[Show Snackbar N Imported]
+                    R -->|Error 400| T[Show Error Snackbar]
+                    S --> U[Reload Current Page]
                     T --> V[Hide Loading]
                     </div>
                 </div>
@@ -586,14 +588,15 @@ graph TD
                 <div class="panel-desc">All error scenarios and how they surface to the user</div>
             </div>
             <div class="panel-body">
-                <div class="info-box">The system handles multiple error types: validation errors (form field level), business logic errors (duplicate email, not found), and server errors. All are caught, parsed into structured error objects, and displayed appropriately: field errors in forms, general errors in toasts, and no stack traces exposed to the user.</div>
+                <div class="info-box">The system handles multiple error types: validation errors (422 with a field), business logic errors (409 duplicate email, 404 not found), bad requests (400 for upload problems) and server errors. The backend returns every one in the standard envelope, the store parses them into errors and fieldErrors, and the UI shows field errors as form helper text and general errors in the snackbar. No stack traces or library error text reach the user.</div>
                 <div class="mermaid-box">
                     <div class="mermaid" id="m10">
 graph TD
                     A[API Request] --> B{Error?}
                     B -->|No Error| C[Success Response]
                     B -->|HTTP Error| D{Status Code}
-                    D -->|400| E[Validation Error]
+                    D -->|422| E[Validation Error]
+                    D -->|400| Z[Bad Request]
                     D -->|404| F[Not Found Error]
                     D -->|409| G[Conflict Error]
                     D -->|500| H[Server Error]
@@ -604,6 +607,8 @@ graph TD
                     K --> M[Set error state]
                     L --> N[Show in Form]
                     M --> O[Show in Toast]
+                    Z --> Z2[Show Error Snackbar]
+                    Z2 --> W
                     F --> P[User Not Found]
                     P --> Q[Show Error Toast]
                     G --> R[Duplicate Email]

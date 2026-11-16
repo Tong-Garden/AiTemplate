@@ -1,3 +1,8 @@
+---
+name: userflow
+description: Generate visual user-flow HTML documentation (Mermaid diagrams, Claude Design System) for one or more features. Use when asked to create a user flow for X (or X, Y, Z).
+---
+
 # /userflow — Generate Visual User Flow Documentation
 
 Generate complete, interactive user flow HTML files for one or **multiple** features using the **Claude Design System** with Mermaid diagrams.

@@ -1,27 +1,32 @@
-import type { UserDto } from '../dtos';
+import type { ApiError } from '@/core/data/remote/api-error';
+import type { PaginationMetaDto } from '@/core/data/remote/api-types';
+import type { UploadUsersResultDto, UserDto } from '../dtos';
 import type { CreateUserFormData, UpdateUserFormData } from '../schemas';
 
+/** Data and status flags held by the user store. */
 export type UserState = {
-  // Data
   users: UserDto[];
   selectedUser: UserDto | null;
-
-  // Single status state
+  pagination: PaginationMetaDto;
   isLoading: boolean;
   error: string | null;
+  errors: ApiError[];
+  fieldErrors: Record<string, string>;
   isSuccess: boolean;
   isUpdated: boolean;
   isDeleted: boolean;
-  isUploaded: boolean;
 };
 
+/** User store: state plus the actions that change it. */
 export type UserStore = UserState & {
-  // Actions
-  fetchUsers: () => Promise<void>;
+  fetchUsers: (page?: number, limit?: number) => Promise<void>;
   fetchUserById: (id: string) => Promise<void>;
   createUser: (formData: CreateUserFormData) => Promise<UserDto>;
   updateUser: (id: string, formData: UpdateUserFormData) => Promise<UserDto>;
   deleteUser: (id: string) => Promise<void>;
-  uploadUsers: (file: File) => Promise<{ count: number; message: string }>;
-  clearError: () => void;
+  uploadUsers: (file: File) => Promise<UploadUsersResultDto>;
+  goToPage: (page: number) => Promise<void>;
+  nextPage: () => Promise<void>;
+  previousPage: () => Promise<void>;
+  setLimit: (limit: number) => Promise<void>;
 };

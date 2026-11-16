@@ -1,5 +1,3 @@
-from typing import List
-
 from openpyxl import load_workbook
 
 from ..domain import User
@@ -12,7 +10,7 @@ class ExcelParser:
     REQUIRED_COLUMNS = {"name", "email", "phone", "status"}
 
     @staticmethod
-    def parse_users(file_path: str) -> List[User]:
+    def parse_users(file_path: str) -> list[User]:
         users = []
         try:
             workbook = load_workbook(file_path)
@@ -35,23 +33,27 @@ class ExcelParser:
                     continue
 
                 try:
+                    status = row[col_indices["status"]]
                     row_data = {
                         "name": row[col_indices["name"]],
                         "email": row[col_indices["email"]],
                         "phone": row[col_indices["phone"]],
-                        "status": row[col_indices["status"]],
                     }
 
-                    if all(row_data.values()):
+                    if all(row_data.values()) and status is not None and status != "":
+                        row_data = {key: str(value).strip() for key, value in row_data.items()}
+                        row_data["is_active"] = (
+                            status if isinstance(status, bool) else str(status).strip()
+                        )
                         user = UserMapper.from_excel_row(row_data)
                         users.append(user)
                 except (IndexError, TypeError, ValueError):
                     continue
 
             workbook.close()
-        except FileNotFoundError:
-            raise ValueError(f"File not found: {file_path}")
-        except Exception as e:
-            raise ValueError(f"Error parsing Excel file: {str(e)}")
+        except ValueError:
+            raise
+        except Exception:
+            raise ValueError("The file could not be read as an Excel workbook")
 
         return users

@@ -1,9 +1,10 @@
-import { userApi } from '../repo/user.api';
+import { userRepo } from '../repo/user.repo';
 import type { UserDto } from '../dtos';
 
-export const getUserByIdService = async (id: string): Promise<UserDto> => {
-  if (!id) {
-    throw new Error('User ID is required');
-  }
-  return userApi.getById(id);
-};
+/**
+ * Fetches one user.
+ *
+ * @param id - User id.
+ * @returns The user.
+ */
+export const getUserByIdService = async (id: string): Promise<UserDto> => userRepo.getById(id);

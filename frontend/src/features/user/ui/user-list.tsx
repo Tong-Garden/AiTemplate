@@ -18,23 +18,42 @@ import type {
   ActionEventArgs,
 } from '@syncfusion/ej2-react-grids';
 import type { ClickEventArgs } from '@syncfusion/ej2-react-navigations';
-import { Backdrop, Box, CircularProgress, IconButton, Tooltip } from '@mui/material';
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  MenuItem,
+  Pagination,
+  Select,
+  Tooltip,
+  Typography,
+} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { AppSnackbar } from '@/common/components';
 import { useUserStore } from '../state/user.store';
 import type { UserDto } from '../dtos';
 
+const PAGE_SIZES = [10, 20, 50, 100];
+
+/** Paginated Syncfusion grid with inline add, edit and delete for users. */
 export function UserList() {
   const users = useUserStore((state) => state.users);
+  const pagination = useUserStore((state) => state.pagination);
   const isLoading = useUserStore((state) => state.isLoading);
   const error = useUserStore((state) => state.error);
   const isSuccess = useUserStore((state) => state.isSuccess);
   const isUpdated = useUserStore((state) => state.isUpdated);
   const isDeleted = useUserStore((state) => state.isDeleted);
   const fetchUsers = useUserStore((state) => state.fetchUsers);
-  const deleteUser = useUserStore((state) => state.deleteUser);
-  const updateUser = useUserStore((state) => state.updateUser);
   const createUser = useUserStore((state) => state.createUser);
+  const updateUser = useUserStore((state) => state.updateUser);
+  const deleteUser = useUserStore((state) => state.deleteUser);
+  const goToPage = useUserStore((state) => state.goToPage);
+  const nextPage = useUserStore((state) => state.nextPage);
+  const previousPage = useUserStore((state) => state.previousPage);
+  const setLimit = useUserStore((state) => state.setLimit);
 
   const gridRef = useRef<GridComponentType>(null);
 
@@ -42,26 +61,25 @@ export function UserList() {
     fetchUsers();
   }, [fetchUsers]);
 
-  useEffect(() => {
+  const refresh = (): void => {
+    fetchUsers(pagination.page, pagination.limit);
     gridRef.current?.refresh();
-  }, [users]);
+  };
 
   const handleActionComplete = async (args: ActionEventArgs): Promise<void> => {
-    if (args.requestType === 'save') {
-      const { id, name, email, phone, is_active } = args.data as UserDto;
-      if (args.action === 'edit') {
-        await updateUser(id, { name, email, phone, is_active });
-      } else if (args.action === 'add') {
-        await createUser({ name, email, phone, is_active });
+    try {
+      if (args.requestType === 'save') {
+        const { id, name, email, phone, is_active } = args.data as UserDto;
+        const values = { name, email, phone, is_active };
+        await (args.action === 'add' ? createUser(values) : updateUser(id, values));
+      } else if (args.requestType === 'delete') {
+        for (const row of args.data as Array<{ id: string }>) {
+          await deleteUser(row.id);
+        }
       }
-      await fetchUsers();
-      gridRef.current?.refresh();
-    } else if (args.requestType === 'delete') {
-      for (const row of args.data as Array<{ id: string }>) {
-        await deleteUser(row.id);
-      }
-      await fetchUsers();
-      gridRef.current?.refresh();
+    } catch {
+      // The store recorded the error; reload so the grid drops the edit the server rejected.
+      refresh();
     }
   };
 
@@ -75,13 +93,7 @@ export function UserList() {
     <Box sx={{ width: '100%' }}>
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 1 }}>
         <Tooltip title="Refresh">
-          <IconButton
-            onClick={() => {
-              fetchUsers();
-              gridRef.current?.refresh();
-            }}
-            disabled={isLoading}
-          >
+          <IconButton onClick={refresh} disabled={isLoading}>
             <RefreshIcon />
           </IconButton>
         </Tooltip>
@@ -91,36 +103,43 @@ export function UserList() {
         ref={gridRef}
         key={users.length}
         dataSource={users}
-        allowPaging={true}
+        allowPaging={false}
         allowSorting={true}
         allowExcelExport={true}
-        pageSettings={{ pageSize: 10 }}
         editSettings={{
           allowEditing: true,
           allowAdding: true,
           allowDeleting: true,
-          mode: 'Normal',
+          mode: 'Inline',
+          allowEditOnDblClick: true,
         }}
-        toolbar={['Add', 'Edit', 'Delete', 'Update', 'Cancel', 'Search', 'ExcelExport']}
+        toolbar={['Search', 'ExcelExport', 'Add', 'Edit', 'Delete', 'Update', 'Cancel']}
         toolbarClick={handleToolbarClick}
         actionComplete={handleActionComplete}
       >
         <ColumnsDirective>
+          <ColumnDirective field="id" isPrimaryKey={true} visible={false} />
           <ColumnDirective
-            field="id"
-            headerText="ID"
-            width={80}
-            isPrimaryKey={true}
-            allowEditing={false}
-            template={(props: UserDto) => (
-              <span title={props.id} style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
-                {String(props.id).slice(0, 8)}…
-              </span>
-            )}
+            field="name"
+            headerText="Name"
+            width={150}
+            editType="stringedit"
+            validationRules={{ required: true, minLength: 2 }}
           />
-          <ColumnDirective field="name" headerText="Name" width={150} editType="stringedit" />
-          <ColumnDirective field="email" headerText="Email" width={200} editType="stringedit" />
-          <ColumnDirective field="phone" headerText="Phone" width={130} editType="stringedit" />
+          <ColumnDirective
+            field="email"
+            headerText="Email"
+            width={200}
+            editType="stringedit"
+            validationRules={{ required: true, email: true }}
+          />
+          <ColumnDirective
+            field="phone"
+            headerText="Phone"
+            width={130}
+            editType="stringedit"
+            validationRules={{ required: true, minLength: 5 }}
+          />
           <ColumnDirective
             field="is_active"
             headerText="Active"
@@ -132,6 +151,55 @@ export function UserList() {
 
         <Inject services={[Page, Search, Toolbar, Edit, Sort, ExcelExport]} />
       </GridComponent>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: 2,
+          mt: 2,
+        }}
+      >
+        <Typography variant="body2">
+          {users.length} of {pagination.total} total
+        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button
+            size="small"
+            onClick={() => previousPage()}
+            disabled={!pagination.hasPreviousPage || isLoading}
+          >
+            Previous
+          </Button>
+          <Pagination
+            count={Math.max(pagination.totalPages, 1)}
+            page={pagination.page}
+            onChange={(_event, value) => goToPage(value)}
+            disabled={isLoading}
+          />
+          <Button
+            size="small"
+            onClick={() => nextPage()}
+            disabled={!pagination.hasNextPage || isLoading}
+          >
+            Next
+          </Button>
+          <Select
+            size="small"
+            value={pagination.limit}
+            onChange={(event) => setLimit(Number(event.target.value))}
+            disabled={isLoading}
+          >
+            {PAGE_SIZES.map((size) => (
+              <MenuItem key={size} value={size}>
+                {size} / page
+              </MenuItem>
+            ))}
+          </Select>
+        </Box>
+      </Box>
 
       {isLoading ? (
         <Backdrop

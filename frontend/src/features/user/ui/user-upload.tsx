@@ -1,89 +1,109 @@
 'use client';
 
 import { useState } from 'react';
+import type { ChangeEvent } from 'react';
 import {
   Box,
   Button,
-  Alert,
   CircularProgress,
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
+  Typography,
 } from '@mui/material';
 import { CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+import { AppSnackbar } from '@/common/components';
 import { useUserStore } from '../state/user.store';
 
-interface UserUploadProps {
+type UserUploadProps = {
   open: boolean;
   onClose: () => void;
-}
+};
 
+/**
+ * Dialog for importing users from an Excel file.
+ *
+ * Failures show in the list's snackbar, which reads the same store error.
+ *
+ * @param props - Whether the dialog is open and the close handler.
+ */
 export function UserUpload({ open, onClose }: UserUploadProps) {
-  const isLoadingUpload = useUserStore((state) => state.isLoading);
-  const uploadError = useUserStore((state) => state.error);
+  const isLoading = useUserStore((state) => state.isLoading);
   const uploadUsers = useUserStore((state) => state.uploadUsers);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [importedCount, setImportedCount] = useState<number | null>(null);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>): void => {
     const file = event.target.files?.[0];
     if (file) {
       setSelectedFile(file);
     }
   };
 
-  const handleUpload = async () => {
-    if (!selectedFile) {
-      setUploadMessage('Please select a file');
-      return;
-    }
-
+  const handleUpload = async (): Promise<void> => {
+    if (!selectedFile) return;
     try {
       const result = await uploadUsers(selectedFile);
-      setUploadMessage(`${result.count} users imported successfully`);
-      setTimeout(() => {
-        onClose();
-        setSelectedFile(null);
-        setUploadMessage(null);
-      }, 2000);
+      setImportedCount(result.count);
+      setSelectedFile(null);
+      onClose();
     } catch {
-      // Error is already stored in store
+      // The store recorded the error and the list snackbar shows it.
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Upload Users from Excel</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-        {uploadError && <Alert severity="error">{uploadError}</Alert>}
-        {uploadMessage && <Alert severity="success">{uploadMessage}</Alert>}
+    <>
+      <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+        <DialogTitle>Upload Users from Excel</DialogTitle>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+          <Box
+            sx={{
+              border: '2px dashed',
+              borderColor: 'primary.main',
+              borderRadius: 1,
+              p: 3,
+              textAlign: 'center',
+            }}
+          >
+            <Box
+              component="input"
+              type="file"
+              accept=".xlsx,.xls"
+              onChange={handleFileSelect}
+              id="file-input"
+              sx={{ display: 'none' }}
+            />
+            <Box
+              component="label"
+              htmlFor="file-input"
+              sx={{ cursor: 'pointer', display: 'block' }}
+            >
+              <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
+              <Typography>
+                {selectedFile ? selectedFile.name : 'Click to select Excel file'}
+              </Typography>
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={onClose}>Cancel</Button>
+          <Button
+            onClick={handleUpload}
+            variant="contained"
+            color="primary"
+            disabled={!selectedFile || isLoading}
+          >
+            {isLoading ? <CircularProgress size={24} /> : 'Upload'}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
-        <Box sx={{ border: '2px dashed #1976d2', borderRadius: 1, p: 3, textAlign: 'center' }}>
-          <input
-            type="file"
-            accept=".xlsx,.xls"
-            onChange={handleFileSelect}
-            style={{ display: 'none' }}
-            id="file-input"
-          />
-          <label htmlFor="file-input" style={{ cursor: 'pointer', display: 'block' }}>
-            <CloudUploadIcon sx={{ fontSize: 48, color: '#1976d2', mb: 1 }} />
-            <p>{selectedFile ? selectedFile.name : 'Click to select Excel file'}</p>
-          </label>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
-        <Button
-          onClick={handleUpload}
-          variant="contained"
-          color="primary"
-          disabled={!selectedFile || isLoadingUpload}
-        >
-          {isLoadingUpload ? <CircularProgress size={24} /> : 'Upload'}
-        </Button>
-      </DialogActions>
-    </Dialog>
+      <AppSnackbar
+        isSuccess={importedCount !== null}
+        successMessage={`${importedCount ?? 0} users imported successfully`}
+      />
+    </>
   );
 }

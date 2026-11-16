@@ -1,15 +1,18 @@
-import { userApi } from '../repo/user.api';
+import { userRepo } from '../repo/user.repo';
+import type { UploadUsersResultDto } from '../dtos';
 
-export const uploadUsersService = async (
-  file: File,
-): Promise<{ count: number; message: string }> => {
-  if (!file) {
-    throw new Error('File is required');
-  }
+const EXCEL_EXTENSIONS = ['.xlsx', '.xls'];
 
-  if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls')) {
+/**
+ * Checks the file is an Excel workbook and uploads it.
+ *
+ * @param file - The workbook chosen by the user.
+ * @returns How many users were imported.
+ * @throws Error when the file is not an Excel workbook.
+ */
+export const uploadUsersService = async (file: File): Promise<UploadUsersResultDto> => {
+  if (!EXCEL_EXTENSIONS.some((extension) => file.name.toLowerCase().endsWith(extension))) {
     throw new Error('File must be an Excel file (.xlsx or .xls)');
   }
-
-  return userApi.uploadUsers(file);
+  return userRepo.uploadUsers(file);
 };

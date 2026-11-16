@@ -21,6 +21,12 @@ repos:
         language: system
         types: [python]
 
+      - id: ruff
+        name: ruff (built-in generics)
+        entry: uv run ruff check
+        language: system
+        types: [python]
+
       - id: mypy
         name: mypy
         entry: uv run mypy

@@ -35,7 +35,14 @@ if ! uv run flake8 app/; then
 fi
 echo ""
 
-echo "4️⃣  Running mypy (type checking)..."
+echo "4️⃣  Running ruff (built-in generics, no typing.Dict or Optional)..."
+if ! uv run ruff check app/ tests/; then
+    echo "❌ ruff found deprecated typing hints. Run: uv run ruff check app/ tests/ --fix"
+    FAILED=1
+fi
+echo ""
+
+echo "5️⃣  Running mypy (type checking)..."
 if ! uv run mypy app/; then
     echo "❌ mypy found type errors"
     FAILED=1

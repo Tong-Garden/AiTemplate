@@ -1,5 +1,5 @@
+import builtins
 import uuid
-from typing import List, Optional
 
 from ...domain import User
 
@@ -18,17 +18,19 @@ class InMemoryUserRepository:
         self.users[user.id] = user
         return user
 
-    async def get_by_id(self, user_id: str) -> Optional[User]:
+    async def get_by_id(self, user_id: str) -> User | None:
         return self.users.get(user_id)
 
-    async def get_by_email(self, email: str) -> Optional[User]:
+    async def get_by_email(self, email: str) -> User | None:
         for user in self.users.values():
             if user.email == email:
                 return user
         return None
 
-    async def list_all(self) -> List[User]:
-        return list(self.users.values())
+    async def list(self, offset: int, limit: int) -> tuple[list[User], int]:
+        """Return a slice of users and the total count."""
+        items = list(self.users.values())
+        return items[offset : offset + limit], len(items)
 
     async def update(self, user: User) -> User:
         self.users[user.id] = user
@@ -41,6 +43,6 @@ class InMemoryUserRepository:
     async def clear(self) -> None:
         self.users.clear()
 
-    async def load_users(self, users: List[User]) -> None:
+    async def load_users(self, users: builtins.list[User]) -> None:
         for user in users:
             self.users[user.id] = user

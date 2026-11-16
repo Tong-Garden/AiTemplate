@@ -1,12 +1,13 @@
 import { api } from '@/core/data/remote/api';
 import ENDPOINTS from '@/core/data/remote/endpoints';
-import type { CreateUserDto, UpdateUserDto, UserDto } from '../dtos';
+import { getPaginated } from '@/core/data/remote/paginated';
+import type { PaginatedResult } from '@/core/data/remote/api-types';
+import type { CreateUserDto, UpdateUserDto, UploadUsersResultDto, UserDto } from '../dtos';
 
-export const userApi = {
-  getAll: async (): Promise<UserDto[]> => {
-    const { data } = await api.get<UserDto[]>(ENDPOINTS.USER);
-    return data;
-  },
+/** HTTP calls for `/v1/users`; no validation or mapping. */
+export const userRepo = {
+  getAll: (page: number, limit: number): Promise<PaginatedResult<UserDto[]>> =>
+    getPaginated<UserDto[]>(ENDPOINTS.USER, { page, limit }),
 
   getById: async (id: string): Promise<UserDto> => {
     const { data } = await api.get<UserDto>(`${ENDPOINTS.USER}/${id}`);
@@ -27,18 +28,12 @@ export const userApi = {
     await api.delete(`${ENDPOINTS.USER}/${id}`);
   },
 
-  uploadUsers: async (file: File): Promise<{ count: number; message: string }> => {
+  uploadUsers: async (file: File): Promise<UploadUsersResultDto> => {
     const formData = new FormData();
     formData.append('file', file);
-    const { data } = await api.post<{ count: number; message: string }>(
-      `${ENDPOINTS.USER}/upload`,
-      formData,
-      {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      },
-    );
+    const { data } = await api.post<UploadUsersResultDto>(`${ENDPOINTS.USER}/upload`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
     return data;
   },
 };

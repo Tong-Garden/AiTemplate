@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Country User Flows</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a202c; min-height: 100vh; }
+        .header { background: linear-gradient(135deg, #1f2937, #374151); color: #fff; padding: 40px 32px; display: flex; align-items: center; gap: 20px; }
+        .header-text h1 { font-size: 2em; font-weight: 700; letter-spacing: -0.02em; }
+        .header-text p  { margin-top: 6px; opacity: 0.75; font-size: 0.97em; }
+        .stats-bar { background: #1e3a5f; display: flex; justify-content: center; gap: 0; }
+        .stat { padding: 14px 40px; text-align: center; border-right: 1px solid rgba(255,255,255,0.1); }
+        .stat:last-child { border-right: none; }
+        .stat-num  { font-size: 1.5em; font-weight: 700; color: #60a5fa; }
+        .stat-lbl  { font-size: 0.75em; color: rgba(255,255,255,0.6); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.05em; }
+        .layout { display: flex; min-height: calc(100vh - 160px); }
+        .sidebar { width: 220px; flex-shrink: 0; background: #fff; border-right: 1px solid #e5e7eb; padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .sidebar-title { font-size: 0.7em; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 16px 12px; }
+        .tab-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: transparent; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.88em; color: #4b5563; text-align: left; transition: all 0.15s; border-left: 3px solid transparent; }
+        .tab-btn:hover { background: #f9fafb; color: #1a202c; }
+        .tab-btn.active { background: #eff6ff; color: #2563eb; font-weight: 600; border-left-color: #3b82f6; }
+        .tab-num { width: 22px; height: 22px; border-radius: 6px; background: #f0f1f3; font-size: 0.78em; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #6b7280; }
+        .tab-btn.active .tab-num { background: #3b82f6; color: white; }
+        .main { flex: 1; padding: 32px; overflow: auto; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .panel-header { background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px 12px 0 0; padding: 24px 28px; color: white; }
+        .panel-badge { display: inline-block; background: rgba(255,255,255,0.18); padding: 3px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 10px; }
+        .panel-title { font-size: 1.7em; font-weight: 700; margin-bottom: 6px; }
+        .panel-desc  { opacity: 0.85; font-size: 0.95em; }
+        .panel-body { background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 28px; }
+        .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 14px 18px; border-radius: 0 8px 8px 0; margin-bottom: 28px; font-size: 0.93em; color: #1e3a8a; line-height: 1.65; }
+        .mermaid-box { background: #fafbfc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 40px 20px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow-x: auto; }
+        .mermaid-box .mermaid { width: 100%; display: flex; justify-content: center; }
+        .mermaid-box svg { max-width: 100%; height: auto; min-height: 260px; }
+        .nav-arrows { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; }
+        .arrow-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid #e5e7eb; background: #fff; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 500; color: #374151; transition: all 0.15s; }
+        .arrow-btn:hover { background: #f9fafb; border-color: #3b82f6; color: #2563eb; }
+        .arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .progress-label { font-size: 0.85em; color: #6b7280; }
+        @media (max-width: 768px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; display: flex; flex-wrap: wrap; padding: 10px; gap: 6px; }
+            .tab-btn { width: auto; padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 6px; border-left: 3px solid transparent; }
+            .stats-bar { flex-wrap: wrap; }
+            .stat { padding: 10px 20px; }
+            .main { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div style="font-size:3em;">🌍</div>
+    <div class="header-text">
+        <h1>Country User Flows</h1>
+        <p>Complete visual guide to Country system interactions and architecture</p>
+    </div>
+</div>
+
+<div class="stats-bar">
+    <div class="stat"><div class="stat-num">10</div><div class="stat-lbl">Flow Diagrams</div></div>
+    <div class="stat"><div class="stat-num">0</div><div class="stat-lbl">Statuses</div></div>
+    <div class="stat"><div class="stat-num">1</div><div class="stat-lbl">User Roles</div></div>
+    <div class="stat"><div class="stat-num">5</div><div class="stat-lbl">API Endpoints</div></div>
+</div>
+
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-title">Flow Diagrams</div>
+        <button class="tab-btn active" onclick="showPanel(1)"><span class="tab-num">1</span> Main Flow</button>
+        <button class="tab-btn" onclick="showPanel(2)"><span class="tab-num">2</span> Create</button>
+        <button class="tab-btn" onclick="showPanel(3)"><span class="tab-num">3</span> Lifecycle</button>
+        <button class="tab-btn" onclick="showPanel(4)"><span class="tab-num">4</span> Edit</button>
+        <button class="tab-btn" onclick="showPanel(5)"><span class="tab-num">5</span> Delete</button>
+        <button class="tab-btn" onclick="showPanel(6)"><span class="tab-num">6</span> List</button>
+        <button class="tab-btn" onclick="showPanel(7)"><span class="tab-num">7</span> Search</button>
+        <button class="tab-btn" onclick="showPanel(8)"><span class="tab-num">8</span> Detail</button>
+        <button class="tab-btn" onclick="showPanel(9)"><span class="tab-num">9</span> Errors</button>
+        <button class="tab-btn" onclick="showPanel(10)"><span class="tab-num">10</span> Architecture</button>
+    </nav>
+
+    <main class="main">
+        <div id="panel-1" class="panel active">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 1 OF 10</div>
+                <div class="panel-title">Countries Overview</div>
+                <div class="panel-desc">Every entry point of the Countries page</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The administrator opens Countries from the side menu. The page loads page 1 and offers the grid, the New Country form and pagination controls.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m1">
+graph TD
+    A[Open Countries from menu] --> B[Load page 1 of countries]
+    B --> C{Choose action}
+    C -->|New Country| D[Open create form]
+    C -->|Double click row| E[Edit row inline]
+    C -->|Select and Delete| F[Delete country]
+    C -->|Change page or size| G[Fetch another page]
+    C -->|Refresh| B
+    C -->|Excel export| H[Download current page]
+    D --> B
+    E --> B
+    F --> B
+    G --> C
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" disabled>Previous</button>
+                    <span class="progress-label">1 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(2)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-2" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 2 OF 10</div>
+                <div class="panel-title">Create Country Flow</div>
+                <div class="panel-desc">From the New Country form to the stored record</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The form validates with Zod first and upper-cases the ISO code. The backend trims and checks every field, then rejects duplicate names and ISO codes.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m2">
+sequenceDiagram
+    actor U as Administrator
+    participant FE as Country Form
+    participant ST as Country Store
+    participant API as Backend API
+    participant SV as Country Service
+    U->>FE: Fill name ISO code and phone code
+    FE->>FE: Zod validation
+    FE->>ST: createCountry
+    ST->>API: POST /v1/countries
+    API->>SV: create
+    SV->>SV: Trim and validate fields
+    SV->>SV: Upper case ISO code
+    SV->>SV: Check name and ISO code are unique
+    SV-->>API: Country saved
+    API-->>ST: 201 with country
+    ST->>API: GET /v1/countries for current page
+    ST-->>FE: Close dialog and show snackbar
+    FE-->>U: New country in the list
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(1)">Previous</button>
+                    <span class="progress-label">2 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(3)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-3" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 3 OF 10</div>
+                <div class="panel-title">Country Lifecycle</div>
+                <div class="panel-desc">States a country record moves through</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Country has no status field. Its lifecycle is existence only: a record is created, edited any number of times, and finally deleted.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m3">
+stateDiagram-v2
+    [*] --> ACTIVE : Create
+    ACTIVE --> ACTIVE : Update fields
+    ACTIVE --> [*] : Delete
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(2)">Previous</button>
+                    <span class="progress-label">3 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(4)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-4" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 4 OF 10</div>
+                <div class="panel-title">Edit Country Flow</div>
+                <div class="panel-desc">Inline editing in the grid with validation</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Double clicking a row opens inline edit. Only the saved fields are sent. If the server rejects the change, the page is reloaded so the grid shows the real data.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m4">
+graph TD
+    A[Double click a row] --> B[Edit fields inline]
+    B --> C[Click Update]
+    C --> D{Grid rules pass?}
+    D -->|No| B
+    D -->|Yes| E[Zod validation in service]
+    E --> F[PUT /v1/countries id]
+    F --> G{Server accepts?}
+    G -->|Yes| H[Store patches the row]
+    H --> I[Show updated snackbar]
+    G -->|No| J[Show error snackbar]
+    J --> K[Reload current page]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(3)">Previous</button>
+                    <span class="progress-label">4 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(5)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-5" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 5 OF 10</div>
+                <div class="panel-title">Delete Country Flow</div>
+                <div class="panel-desc">Removing one or more countries</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Selected rows are deleted one by one. After each delete the store reloads the page, and steps back one page when the last row of a later page was removed.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m5">
+graph TD
+    A[Select row in grid] --> B[Click Delete]
+    B --> C[DELETE /v1/countries id]
+    C --> D{Found?}
+    D -->|No| E[Show not found error]
+    E --> F[Reload current page]
+    D -->|Yes| G[Show deleted snackbar]
+    G --> H{Last row on page above 1?}
+    H -->|Yes| I[Load previous page]
+    H -->|No| J[Reload same page]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(4)">Previous</button>
+                    <span class="progress-label">5 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(6)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-6" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 6 OF 10</div>
+                <div class="panel-title">List With Pagination</div>
+                <div class="panel-desc">How a page of countries reaches the screen</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The backend slices the data and returns total counts in meta. The store keeps the full meta and the UI renders Previous, Next, page numbers, page size and the X of Y total text.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m6">
+graph TD
+    A[Request page and limit] --> B[Zod checks page and limit]
+    B --> C[GET /v1/countries]
+    C --> D[Repository slices by offset and limit]
+    D --> E[Response with data and meta]
+    E --> F[Store saves countries and pagination]
+    F --> G[Grid shows rows]
+    F --> H[Pagination shows pages and total]
+    H --> I{User changes page or size}
+    I -->|Page| A
+    I -->|Size| J[Reset to page 1]
+    J --> A
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(5)">Previous</button>
+                    <span class="progress-label">6 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(7)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-7" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 7 OF 10</div>
+                <div class="panel-title">Search and Sort</div>
+                <div class="panel-desc">Toolbar search and column sorting</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Search and sorting are handled by the grid on the rows of the current page. Use the paging controls to move between pages of data from the server.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m7">
+graph LR
+    A[Type in toolbar search] --> B[Grid filters current page rows]
+    C[Click column header] --> D[Grid sorts current page rows]
+    B --> E[Visible rows update]
+    D --> E
+    E --> F[Excel export uses visible rows]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(6)">Previous</button>
+                    <span class="progress-label">7 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(8)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-8" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 8 OF 10</div>
+                <div class="panel-title">Get Country By Id</div>
+                <div class="panel-desc">Reading one country</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The API exposes a single country by id and the store can load it as the selected country. An unknown id produces a not found error in the standard envelope.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m8">
+graph TD
+    A[Store fetchCountryById] --> B[GET /v1/countries id]
+    B --> C{Country exists?}
+    C -->|Yes| D[200 with country]
+    D --> E[Store saves selected country]
+    C -->|No| F[404 not found envelope]
+    F --> G[Store keeps error and field errors]
+    G --> H[Snackbar shows the error]
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(7)">Previous</button>
+                    <span class="progress-label">8 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(9)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-9" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 9 OF 10</div>
+                <div class="panel-title">Error Handling</div>
+                <div class="panel-desc">How each failure reaches the user</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Every backend error uses the envelope with type, title, status, detail and field. The API client turns it into structured errors, the store keeps error, errors and fieldErrors for five seconds, and the UI shows them.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m9">
+graph TD
+    A[Request fails] --> B{Which error?}
+    B -->|422 bad ISO or phone code| C[Field error under the input]
+    B -->|409 duplicate name or ISO code| D[Conflict snackbar]
+    B -->|404 not found| E[Not found snackbar]
+    B -->|500 unexpected| F[Generic server error snackbar]
+    B -->|Zod in browser| C
+    C --> G[Store clears errors after 5 seconds]
+    D --> G
+    E --> G
+    F --> G
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(8)">Previous</button>
+                    <span class="progress-label">9 of 10</span>
+                    <button class="arrow-btn" onclick="showPanel(10)">Next</button>
+                </div>
+            </div>
+        </div>
+        <div id="panel-10" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">DIAGRAM 10 OF 10</div>
+                <div class="panel-title">Data Flow Architecture</div>
+                <div class="panel-desc">Layers from the screen to the repository and back</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Frontend follows UI to store to service to mapper to repo. Backend follows router to service to repository to domain entity, with an envelope response going back.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m10">
+graph TD
+    A[Countries page and grid] --> B[Zustand country store]
+    B --> C[Services with Zod]
+    C --> D[Mappers]
+    D --> E[Repo with axios]
+    E --> F[FastAPI router with EnvelopeRoute]
+    F --> G[Country service]
+    G --> H[Repository interface]
+    H --> I[In memory repository]
+    I --> J[Country entity]
+    J --> K[Mapper to response schema]
+    K --> L[Envelope response]
+    L --> E
+                    </div>
+                </div>
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(9)">Previous</button>
+                    <span class="progress-label">10 of 10</span>
+                    <button class="arrow-btn" disabled>Next</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({
+        startOnLoad: false,
+        theme: 'default',
+        securityLevel: 'loose',
+        flowchart: { useMaxWidth: true, htmlLabels: false, curve: 'basis' },
+        sequence: { useMaxWidth: true }
+    });
+
+    const rendered = new Set();
+
+    async function renderPanel(id) {
+        if (rendered.has(id)) return;
+        const el = document.getElementById('m' + id);
+        if (!el) return;
+        try {
+            await mermaid.run({ nodes: [el] });
+            rendered.add(id);
+        } catch(e) {
+            el.innerHTML = '<div style="color:#dc2626;padding:20px;text-align:center;">Render error: ' + e.message + '</div>';
+        }
+    }
+
+    window._mermaidRender = renderPanel;
+    renderPanel(1);
+</script>
+
+<script>
+    let currentPanel = 1;
+
+    async function showPanel(n) {
+        document.getElementById('panel-' + currentPanel).classList.remove('active');
+        document.querySelectorAll('.tab-btn')[currentPanel - 1].classList.remove('active');
+        document.getElementById('panel-' + n).classList.add('active');
+        document.querySelectorAll('.tab-btn')[n - 1].classList.add('active');
+        currentPanel = n;
+        if (window._mermaidRender) await window._mermaidRender(n);
+        document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.showPanel = showPanel;
+</script>
+</body>
+</html>

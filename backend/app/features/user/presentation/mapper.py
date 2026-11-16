@@ -22,17 +22,6 @@ class UserMapper:
         return [UserMapper.to_response(user) for user in users]
 
     @staticmethod
-    def from_create_schema(schema: dict) -> User:
-        """Convert HTTP request schema to domain entity."""
-        return User(
-            id="",
-            name=schema["name"],
-            email=schema["email"],
-            phone=schema["phone"],
-            is_active=schema.get("is_active", True),
-        )
-
-    @staticmethod
     def from_excel_row(row: dict) -> User:
         """Convert Excel row data to domain entity."""
         is_active = row.get("is_active", True)

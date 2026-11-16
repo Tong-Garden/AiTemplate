@@ -136,7 +136,7 @@ class OrderLineModel(Base):
 - Data access only — no business logic, no validation
 - `in_memory_<entity>_repository.py` is always the **active** repository
 - Returns domain entities, not ORM models
-- List methods return `tuple[List[Entity], int]` (entities + total count)
+- List methods return `tuple[list[Entity], int]` (entities + total count)
 
 ## Mappers
 
@@ -212,8 +212,10 @@ All endpoints return this shape:
 # 🔒 TYPING RULES
 
 - Type hints on **all** function parameters and return values
-- No bare `dict` / `list` → use `Dict[str, Any]` / `List[T]`
-- `Optional[T]` for nullable values
+- No bare `dict` / `list` → parametrise them: `dict[str, Any]` / `list[T]`
+- Use built-in generics (`dict`, `list`, `set`, `tuple`, `type`) and `X | None` / `A | B`; never `typing.Dict`, `List`, `Set`, `Tuple`, `Type`, `Optional` or `Union` (deprecated since 3.9/3.10)
+- In a class that defines a method named `list`, write `builtins.list[T]` in later annotations so they do not resolve to the method
+- `ruff` (UP006, UP007, UP045) enforces this in `lint.sh` and pre-commit; `/py-typing` converts legacy hints in the files a task changed
 - `async def` + `await` for all I/O
 
 ---

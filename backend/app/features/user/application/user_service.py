@@ -1,24 +1,37 @@
+import builtins
 import re
-from typing import List
+from dataclasses import replace
 
-from ..domain.exceptions import DuplicateEmailError, InvalidEmailError, UserNotFoundError
+from ..domain.exceptions import (
+    DuplicateEmailError,
+    InvalidEmailError,
+    UserNotFoundError,
+    UserValidationError,
+)
 from ..domain.user import User
 from .interface.user_repository_interface import UserRepositoryInterface
 
+EMAIL_PATTERN = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+MIN_NAME_LENGTH = 2
+MIN_PHONE_LENGTH = 5
+
 
 class UserService:
+    """Use cases and business rules for users."""
+
     def __init__(self, repository: UserRepositoryInterface) -> None:
         self.repository = repository
 
     async def create(self, name: str, email: str, phone: str, is_active: bool = True) -> User:
-        if not name or len(name.strip()) < 2:
-            raise ValueError("Name must be at least 2 characters")
+        """Create a user after validating every field.
 
-        if not self._is_valid_email(email):
-            raise InvalidEmailError(email)
-
-        if not phone or len(phone.strip()) < 5:
-            raise ValueError("Phone must be at least 5 characters")
+        Raises:
+            UserValidationError: A field breaks its rule.
+            DuplicateEmailError: The email is already taken.
+        """
+        self._validate_name(name)
+        self._validate_email(email)
+        self._validate_phone(phone)
 
         if await self.repository.get_by_email(email):
             raise DuplicateEmailError(email)
@@ -30,17 +43,18 @@ class UserService:
             phone=phone,
             is_active=is_active,
         )
-
         return await self.repository.create(user)
 
     async def get_by_id(self, user_id: str) -> User:
+        """Return a user or raise UserNotFoundError."""
         user = await self.repository.get_by_id(user_id)
         if not user:
             raise UserNotFoundError(user_id)
         return user
 
-    async def list_all(self) -> List[User]:
-        return await self.repository.list_all()
+    async def list(self, page: int, limit: int) -> tuple[list[User], int]:
+        """Return one page of users and the overall total."""
+        return await self.repository.list((page - 1) * limit, limit)
 
     async def update(
         self,
@@ -50,46 +64,79 @@ class UserService:
         phone: str | None = None,
         is_active: bool | None = None,
     ) -> User:
+        """Apply the supplied fields to a user.
+
+        Changes are validated first and applied to a copy, so a failed update leaves the
+        stored user untouched.
+
+        Raises:
+            UserNotFoundError: No user has this id.
+            UserValidationError: A field breaks its rule.
+            DuplicateEmailError: The new email belongs to another user.
+        """
         user = await self.get_by_id(user_id)
 
         if name is not None:
-            if len(name.strip()) < 2:
-                raise ValueError("Name must be at least 2 characters")
-            user.name = name
+            self._validate_name(name)
 
         if email is not None:
-            if not self._is_valid_email(email):
-                raise InvalidEmailError(email)
-            if email != user.email and await self.repository.get_by_email(email):
+            self._validate_email(email)
+            existing = await self.repository.get_by_email(email)
+            if existing is not None and existing.id != user.id:
                 raise DuplicateEmailError(email)
-            user.email = email
 
         if phone is not None:
-            if len(phone.strip()) < 5:
-                raise ValueError("Phone must be at least 5 characters")
-            user.phone = phone
+            self._validate_phone(phone)
 
-        if is_active is not None:
-            user.is_active = is_active
-
-        return await self.repository.update(user)
+        updated = replace(
+            user,
+            name=user.name if name is None else name,
+            email=user.email if email is None else email,
+            phone=user.phone if phone is None else phone,
+            is_active=user.is_active if is_active is None else is_active,
+        )
+        return await self.repository.update(updated)
 
     async def delete(self, user_id: str) -> None:
+        """Delete a user or raise UserNotFoundError."""
         await self.get_by_id(user_id)
         await self.repository.delete(user_id)
 
-    async def upload_from_excel(self, users: List[User]) -> int:
+    async def upload_from_excel(self, users: builtins.list[User]) -> int:
+        """Store parsed users that are new, giving each a fresh id.
+
+        Rows that break a validation rule or whose email already exists are skipped.
+
+        Returns:
+            How many users were stored.
+        """
         count = 0
         for user in users:
             try:
-                if not await self.repository.get_by_email(user.email):
-                    await self.repository.create(user)
-                    count += 1
-            except Exception:
+                self._validate_name(user.name)
+                self._validate_email(user.email)
+                self._validate_phone(user.phone)
+            except UserValidationError:
                 continue
+            if await self.repository.get_by_email(user.email):
+                continue
+            await self.repository.create(replace(user, id=self.repository.generate_id()))
+            count += 1
         return count
 
     @staticmethod
-    def _is_valid_email(email: str) -> bool:
-        pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-        return bool(re.match(pattern, email))
+    def _validate_name(name: str) -> None:
+        if len(name.strip()) < MIN_NAME_LENGTH:
+            raise UserValidationError("name", f"Name must be at least {MIN_NAME_LENGTH} characters")
+
+    @staticmethod
+    def _validate_email(email: str) -> None:
+        if not EMAIL_PATTERN.match(email):
+            raise InvalidEmailError(email)
+
+    @staticmethod
+    def _validate_phone(phone: str) -> None:
+        if len(phone.strip()) < MIN_PHONE_LENGTH:
+            raise UserValidationError(
+                "phone", f"Phone must be at least {MIN_PHONE_LENGTH} characters"
+            )

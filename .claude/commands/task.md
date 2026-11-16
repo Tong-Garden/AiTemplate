@@ -98,20 +98,21 @@ If a task shows the work is bigger than stated (a missing endpoint, the other si
 1. Parity: every endpoint has a service, store, UI and route; every UI has a working endpoint.
 2. `/simplify`: cleans up reuse, simplification and efficiency. It edits code.
 3. `/code-review --fix`: finds correctness bugs and applies the fixes. It edits code. Run it after `/simplify` so it reviews the simplified code.
-4. `/security-review` when the change touches auth, CORS, input validation, error handling or secrets. Report-only: fix its findings yourself, one at a time, and mention each in the report. Never auto-apply security fixes unreviewed.
-5. Lint: `bash lint.sh` in `backend/` and `frontend/` for each side touched. A non-zero exit code means failure; the output shows which check (`❌` lines). ALL checks must pass. Failures in files you did not touch (for example the user's uncommitted work) are reported, not fixed.
-6. Tests: run `uv run pytest` in `backend/` if tests exist.
-7. Run `/pre-submit <feature>` when a backend entity was added or changed (ORM model / view files).
-8. Docs: `/prd <feature>` and `/userflow <feature>` when the feature's behaviour changed.
-9. Large task: set the plan status to `done` and tell the user the plan file can be deleted.
-10. Report what ran, what failed, and what was skipped, in plain words. Include what `/simplify` and `/code-review --fix` changed (`git diff --stat`) and any finding you chose not to fix.
+4. `/py-typing` when backend Python files changed: converts legacy `typing.Dict` / `List` / `Optional` / `Union` hints to built-in forms in those files only. It edits code, so it runs before lint and tests.
+5. `/security-review` when the change touches auth, CORS, input validation, error handling or secrets. Report-only: fix its findings yourself, one at a time, and mention each in the report. Never auto-apply security fixes unreviewed.
+6. Lint: `bash lint.sh` in `backend/` and `frontend/` for each side touched. A non-zero exit code means failure; the output shows which check (`❌` lines). ALL checks must pass. Failures in files you did not touch (for example the user's uncommitted work) are reported, not fixed.
+7. Tests: run `uv run pytest` in `backend/` if tests exist.
+8. Run `/pre-submit <feature>` when a backend entity was added or changed (ORM model / view files).
+9. Docs: `/prd <feature>` and `/userflow <feature>` when the feature's behaviour changed.
+10. Large task: set the plan status to `done` and tell the user the plan file can be deleted.
+11. Report what ran, what failed, and what was skipped, in plain words. Include what `/simplify` and `/code-review --fix` changed (`git diff --stat`) and any finding you chose not to fix.
 
-Lint, tests and `/pre-submit` come after the editing steps (2 and 3) on purpose: `/simplify` and `/code-review --fix` change code, so everything is re-checked on the final result.
+Lint, tests and `/pre-submit` come after the editing steps (2, 3 and 4) on purpose: `/simplify`, `/code-review --fix` and `/py-typing` change code, so everything is re-checked on the final result.
 
 ### Scope guard for auto-fix steps
 
-`/simplify` and `/code-review` work on the whole diff, which can include the user's unrelated uncommitted work. Protect it:
+`/simplify`, `/code-review` and `/py-typing` work on the whole diff, which can include the user's unrelated uncommitted work. Protect it:
 - **Baseline:** before the first edit of the task, record `git status --short` and, for each file already modified, a hash of its diff (`git diff <file> | md5sum`).
-- **Scope:** tell both skills to touch only the files this task changed. Pass those paths as the target where the skill accepts one.
-- **Verify:** after steps 2 and 3, compare against the baseline. A file that was already dirty and is not in this task's file list must have the same hash. If anything outside the task changed, stop, say which files, and ask before continuing. Do not revert the user's work yourself.
+- **Scope:** tell each of these skills to touch only the files this task changed. Pass those paths as the target where the skill accepts one.
+- **Verify:** after steps 2, 3 and 4, compare against the baseline. A file that was already dirty and is not in this task's file list must have the same hash. If anything outside the task changed, stop, say which files, and ask before continuing. Do not revert the user's work yourself.
 - If either step breaks lint or tests, fix that regression before moving on; if it cannot be fixed in two attempts, undo only the auto-fix changes to files this task owns and report it.

@@ -1,108 +1,91 @@
 'use client';
 
-import { useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { z } from 'zod';
 import {
   Box,
   Button,
-  TextField,
-  FormControlLabel,
   Checkbox,
   CircularProgress,
-  Alert,
+  FormControlLabel,
+  TextField,
 } from '@mui/material';
-import { createUserSchema, updateUserSchema } from '../schemas';
-import type { CreateUserFormData, UpdateUserFormData } from '../schemas';
-import type { UserDto } from '../dtos';
+import { createUserSchema } from '../schemas';
+import type { CreateUserFormData } from '../schemas';
 
-type UserFormProps =
-  | {
-      mode: 'create';
-      initialData?: undefined;
-      onSubmit: (data: CreateUserFormData) => Promise<void>;
-      isLoading?: boolean;
-      error?: string | null;
-    }
-  | {
-      mode: 'edit';
-      initialData?: UserDto;
-      onSubmit: (data: UpdateUserFormData) => Promise<void>;
-      isLoading?: boolean;
-      error?: string | null;
-    };
+type UserFormInput = z.input<typeof createUserSchema>;
 
-export function UserForm({ mode, initialData, onSubmit, isLoading, error }: UserFormProps) {
-  const schema = mode === 'create' ? createUserSchema : updateUserSchema;
+type UserFormProps = {
+  onSubmit: (data: CreateUserFormData) => Promise<void>;
+  isLoading?: boolean;
+  fieldErrors?: Record<string, string>;
+};
 
+/**
+ * Form for creating a user; client errors come from Zod, server errors from `fieldErrors`.
+ *
+ * @param props - Submit handler, loading flag and per-field server errors.
+ */
+export function UserForm({ onSubmit, isLoading = false, fieldErrors = {} }: UserFormProps) {
   const {
     register,
+    control,
     handleSubmit,
     formState: { errors },
-  } = useForm({
-    resolver: zodResolver(schema),
-    defaultValues:
-      mode === 'edit' && initialData
-        ? {
-            name: initialData.name,
-            email: initialData.email,
-            phone: initialData.phone,
-            is_active: initialData.is_active,
-          }
-        : {
-            name: '',
-            email: '',
-            phone: '',
-            is_active: true,
-          },
+  } = useForm<UserFormInput, unknown, CreateUserFormData>({
+    resolver: zodResolver(createUserSchema),
+    defaultValues: { name: '', email: '', phone: '', is_active: true },
   });
+
+  const helper = (field: keyof UserFormInput): string | undefined =>
+    errors[field]?.message ?? fieldErrors[field];
 
   return (
     <Box
       component="form"
-      onSubmit={handleSubmit((data) => (onSubmit as (d: typeof data) => Promise<void>)(data))}
-      sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
+      onSubmit={handleSubmit(onSubmit)}
+      sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}
     >
-      {error && <Alert severity="error">{error}</Alert>}
-
       <TextField
         label="Name"
         {...register('name')}
-        error={!!errors.name}
-        helperText={errors.name?.message}
+        error={!!helper('name')}
+        helperText={helper('name')}
         disabled={isLoading}
       />
-
       <TextField
         label="Email"
-        type="email"
         {...register('email')}
-        error={!!errors.email}
-        helperText={errors.email?.message}
+        error={!!helper('email')}
+        helperText={helper('email')}
         disabled={isLoading}
       />
-
       <TextField
         label="Phone"
         {...register('phone')}
-        error={!!errors.phone}
-        helperText={errors.phone?.message}
+        error={!!helper('phone')}
+        helperText={helper('phone')}
         disabled={isLoading}
       />
-
-      <FormControlLabel
-        control={<Checkbox {...register('is_active')} />}
-        label="Active"
-        disabled={isLoading}
-      />
-
-      <Button type="submit" variant="contained" color="primary" disabled={isLoading} sx={{ mt: 2 }}>
-        {isLoading ? (
-          <CircularProgress size={24} />
-        ) : mode === 'create' ? (
-          'Create User'
-        ) : (
-          'Update User'
+      <Controller
+        name="is_active"
+        control={control}
+        render={({ field }) => (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={field.value}
+                onChange={(event) => field.onChange(event.target.checked)}
+              />
+            }
+            label="Active"
+            disabled={isLoading}
+          />
         )}
+      />
+      <Button type="submit" variant="contained" disabled={isLoading}>
+        {isLoading ? <CircularProgress size={24} /> : 'Create User'}
       </Button>
     </Box>
   );

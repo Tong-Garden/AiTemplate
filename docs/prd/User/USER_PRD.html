@@ -431,16 +431,19 @@
                     <thead><tr><th>#</th><th>Requirement</th><th>Priority</th><th>Notes</th></tr></thead>
                     <tbody>
                         <tr><td>1</td><td>Email must be a valid email format (regex pattern)</td><td><span class="badge badge-must">Must</span></td><td>Enforced at both backend and frontend layers</td></tr>
-                        <tr><td>2</td><td>Email uniqueness constraint (no duplicates)</td><td><span class="badge badge-must">Must</span></td><td>Checked before create/update; returns 400 if duplicate</td></tr>
+                        <tr><td>2</td><td>Email uniqueness constraint (no duplicates)</td><td><span class="badge badge-must">Must</span></td><td>Checked before create/update; returns 409 conflict if duplicate (case-sensitive comparison)</td></tr>
                         <tr><td>3</td><td>Name field must be 2–255 characters</td><td><span class="badge badge-must">Must</span></td><td>Validated in Pydantic schema and Zod schema</td></tr>
                         <tr><td>4</td><td>Phone field must be 5–20 characters</td><td><span class="badge badge-must">Must</span></td><td>Validated in both backend and frontend schemas</td></tr>
                         <tr><td>5</td><td>Active status toggleable (boolean field)</td><td><span class="badge badge-must">Must</span></td><td>Default is True; can be set at creation and update</td></tr>
                         <tr><td>6</td><td>Audit timestamps (created_at, updated_at) auto-managed</td><td><span class="badge badge-must">Must</span></td><td>Set by database on insert/update; not user-editable</td></tr>
-                        <tr><td>7</td><td>List endpoint returns paginated results (page, limit)</td><td><span class="badge badge-must">Must</span></td><td>Default 20 per page, max 100</td></tr>
+                        <tr><td>7</td><td>List endpoint returns paginated results (page, limit)</td><td><span class="badge badge-must">Must</span></td><td>Default 20 per page, max 100; paginated in the repository, response meta carries page, limit, total, totalPages, hasNextPage, hasPreviousPage</td></tr>
                         <tr><td>8</td><td>All endpoints return standard response envelope (status, data, errors, meta)</td><td><span class="badge badge-must">Must</span></td><td>Enforced at presentation layer</td></tr>
                         <tr><td>9</td><td>HTTP status codes match response type (201 for create, 404 for not found, etc.)</td><td><span class="badge badge-must">Must</span></td><td>Consistent error handling throughout</td></tr>
-                        <tr><td>10</td><td>Excel bulk import accepts .xlsx/.xls files</td><td><span class="badge badge-should">Should</span></td><td>Skips duplicate emails silently; returns count of successful imports</td></tr>
-                        <tr><td>11</td><td>UI grid supports inline edit mode with Save/Cancel</td><td><span class="badge badge-must">Must</span></td><td>Double-click to edit; validation errors display immediately</td></tr>
+                        <tr><td>10</td><td>Excel bulk import accepts .xlsx/.xls files up to 5 MB</td><td><span class="badge badge-should">Should</span></td><td>Skips rows with invalid fields or duplicate emails; every stored row gets its own id; returns data.count of imported users; the status column sets is_active</td></tr>
+                        <tr><td>11</td><td>UI grid supports inline edit mode with Save/Cancel</td><td><span class="badge badge-must">Must</span></td><td>Inline mode; double-click to edit; server field errors shown in the New User form helper text</td></tr>
+                        <tr><td>13</td><td>Validation failures return 422 validation-error with the offending field; duplicate email returns 409 conflict; unknown id returns 404 not-found</td><td><span class="badge badge-must">Must</span></td><td>Structured error objects with type, title, status, detail, field</td></tr>
+                        <tr><td>14</td><td>UI shows Previous / Next, MUI Pagination, page-size select and an "X of Y total" indicator</td><td><span class="badge badge-must">Must</span></td><td>Server-side paging; changing the page size returns to page 1</td></tr>
+                        <tr><td>15</td><td>A failed update leaves the stored user unchanged</td><td><span class="badge badge-must">Must</span></td><td>Changes are validated and applied to a copy before saving</td></tr>
                         <tr><td>12</td><td>Search toolbar filters grid in real-time without page reload</td><td><span class="badge badge-should">Should</span></td><td>Syncfusion DataGrid Search service</td></tr>
                     </tbody>
                 </table>
@@ -564,14 +567,14 @@ erDiagram
                             <td>/v1/users</td>
                             <td>Create a new user</td>
                             <td>CreateUserSchema: { name, email, phone, is_active? }</td>
-                            <td>201 Created / 400 Bad Request (validation, duplicate email)</td>
+                            <td>201 Created / 422 validation-error (with field) / 409 conflict (duplicate email)</td>
                         </tr>
                         <tr>
                             <td><span class="badge badge-get">GET</span></td>
                             <td>/v1/users</td>
                             <td>List all users (paginated)</td>
                             <td>Query: page=1, limit=20</td>
-                            <td>200 OK with UserResponse[] and pagination metadata</td>
+                            <td>200 OK with UserResponse[] and meta { page, limit, total, totalPages, hasNextPage, hasPreviousPage }; 422 if limit is above 100 or page is below 1</td>
                         </tr>
                         <tr>
                             <td><span class="badge badge-get">GET</span></td>
@@ -585,7 +588,7 @@ erDiagram
                             <td>/v1/users/{user_id}</td>
                             <td>Update a user (all fields optional)</td>
                             <td>UpdateUserSchema: { name?, email?, phone?, is_active? }</td>
-                            <td>200 OK / 400 Bad Request / 404 Not Found</td>
+                            <td>200 OK / 422 validation-error / 409 conflict / 404 not-found</td>
                         </tr>
                         <tr>
                             <td><span class="badge badge-delete">DELETE</span></td>
@@ -599,7 +602,7 @@ erDiagram
                             <td>/v1/users/upload</td>
                             <td>Bulk import users from Excel file</td>
                             <td>multipart/form-data: file (.xlsx or .xls)</td>
-                            <td>200 OK with { count, message } / 400 Bad Request (invalid file)</td>
+                            <td>200 OK with data { count } / 400 bad-request (not an Excel file, larger than 5 MB, or unreadable workbook)</td>
                         </tr>
                     </tbody>
                 </table>
@@ -615,7 +618,7 @@ erDiagram
     "is_active": true
   },
   "errors": [],
-  "message": "User created successfully"
+  "meta": {}
 }</code></pre>
 
                 <h2 class="section-heading">Response Envelope Example (Error)</h2>
@@ -624,14 +627,14 @@ erDiagram
   "data": null,
   "errors": [
     {
-      "type": "bad-request",
-      "title": "Invalid Email",
-      "status": 400,
-      "detail": "Email 'invalid-email' does not match valid email format",
+      "type": "validation-error",
+      "title": "Validation Error",
+      "status": 422,
+      "detail": "Invalid email format: invalid-email",
       "field": "email"
     }
   ],
-  "message": "Validation failed"
+  "meta": {}
 }</code></pre>
 
                 <div class="nav-arrows">
@@ -655,7 +658,7 @@ erDiagram
                 <table class="data-table">
                     <thead><tr><th>Route</th><th>Page Name</th><th>Components Used</th><th>Auth Required</th></tr></thead>
                     <tbody>
-                        <tr><td>/users</td><td>Users Page</td><td>UsersView (router entry) → UsersList (grid), UserForm (create), UserUpload (modal)</td><td>Yes</td></tr>
+                        <tr><td>/users</td><td>Users Page</td><td>UsersView (router entry) → UserList (paginated grid), UserForm (New User dialog), UserUpload (modal)</td><td>Yes</td></tr>
                     </tbody>
                 </table>
 
@@ -663,11 +666,11 @@ erDiagram
                 <table class="data-table">
                     <thead><tr><th>Form</th><th>Field</th><th>Type</th><th>Required</th><th>Validation Rules</th></tr></thead>
                     <tbody>
-                        <tr><td>Create / Update</td><td>name</td><td>text</td><td>Yes</td><td>Min 2, max 255 characters</td></tr>
+                        <tr><td>Create / Update</td><td>name</td><td>text</td><td>Yes</td><td>Min 2, max 255 characters; server errors shown as helper text</td></tr>
                         <tr><td>Create / Update</td><td>email</td><td>email</td><td>Yes</td><td>Valid email format; must be unique (checked server-side)</td></tr>
                         <tr><td>Create / Update</td><td>phone</td><td>tel</td><td>Yes</td><td>Min 5, max 20 characters</td></tr>
                         <tr><td>Create / Update</td><td>is_active</td><td>checkbox</td><td>No</td><td>Boolean; default True</td></tr>
-                        <tr><td>Upload</td><td>file</td><td>file input</td><td>Yes</td><td>Must be .xlsx or .xls file</td></tr>
+                        <tr><td>Upload</td><td>file</td><td>file input</td><td>Yes</td><td>Must be .xlsx or .xls (case-insensitive) and 5 MB or smaller</td></tr>
                     </tbody>
                 </table>
 
@@ -675,9 +678,9 @@ erDiagram
                 <table class="data-table">
                     <thead><tr><th>Component</th><th>Loading State</th><th>Empty State</th><th>Error State</th></tr></thead>
                     <tbody>
-                        <tr><td>UsersList (Syncfusion DataGrid)</td><td>Backdrop loader overlay</td><td>"No users found. Click Add to create one."</td><td>Toast with error message</td></tr>
+                        <tr><td>UsersList (Syncfusion DataGrid)</td><td>Backdrop loader overlay</td><td>"0 of 0 total" with an empty grid; Previous and Next disabled</td><td>AppSnackbar with the error message; grid reloads after a rejected edit</td></tr>
                         <tr><td>UserForm (React Hook Form + MUI)</td><td>Save button disabled, loader spinner</td><td>—</td><td>Red helperText on each field with validation error</td></tr>
-                        <tr><td>UserUpload (Modal Dialog)</td><td>Loader during file processing</td><td>—</td><td>Toast notification: "File must be an Excel file"</td></tr>
+                        <tr><td>UserUpload (Modal Dialog)</td><td>Loader during file processing</td><td>—</td><td>AppSnackbar error (for example "File must be an Excel file"); success snackbar shows the imported count</td></tr>
                         <tr><td>AppSnackbar (Notifications)</td><td>—</td><td>—</td><td>Displays success "User created", "User updated", "User deleted", or error messages</td></tr>
                     </tbody>
                 </table>

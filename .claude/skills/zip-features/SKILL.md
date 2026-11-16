@@ -1,3 +1,8 @@
+---
+name: zip-features
+description: Create a zip of the project with selected backend/frontend features, or the whole project. Use when asked to zip, back up or export the project.
+---
+
 # /zip-features — Selective Project Zipper
 
 Create a zip file of the project with selective feature inclusion. Choose which backend and frontend features to include, or zip the entire project.

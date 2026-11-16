@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { createStatusHelpers } from '@/core/store/status-helpers';
 import {
   createUserService,
   deleteUserService,
@@ -7,147 +8,96 @@ import {
   updateUserService,
   uploadUsersService,
 } from '../services';
-import type { UserStore } from './user.state';
-import { CreateUserFormData, UpdateUserFormData } from '../schemas';
+import { DEFAULT_LIMIT } from '../schemas';
+import type { UserState, UserStore } from './user.state';
 
+/** Zustand store for users: server-side pagination, error handling and status flags. */
 export const useUserStore = create<UserStore>((set, get) => {
+  const { flash, reportError } = createStatusHelpers<UserState>(set);
+
+  const run = async <T>(action: () => Promise<T>): Promise<T> => {
+    set({ isLoading: true, error: null, errors: [], fieldErrors: {} });
+    try {
+      return await action();
+    } catch (err) {
+      reportError(err as Error);
+      throw err;
+    } finally {
+      set({ isLoading: false });
+    }
+  };
+
+  const reload = async (): Promise<void> => {
+    const { page, limit } = get().pagination;
+    await get().fetchUsers(page, limit);
+  };
+
   return {
     users: [],
     selectedUser: null,
+    pagination: {
+      page: 1,
+      limit: DEFAULT_LIMIT,
+      total: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
     isLoading: false,
     error: null,
+    errors: [],
+    fieldErrors: {},
     isSuccess: false,
     isUpdated: false,
     isDeleted: false,
-    isUploaded: false,
 
-    fetchUsers: async () => {
-      set({ isLoading: true, error: null });
-      try {
-        const data = await getUsersService();
-        set({ users: data });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to fetch users';
-        set({ error: message });
-        get().clearError();
-      } finally {
-        set({ isLoading: false });
-      }
+    fetchUsers: async (page = 1, limit = DEFAULT_LIMIT) => {
+      await run(async () => {
+        const result = await getUsersService(page, limit);
+        set({ users: result.data, pagination: result.meta });
+      }).catch(() => undefined);
     },
 
-    fetchUserById: async (id: string) => {
-      set({ isLoading: true, error: null });
-      try {
-        const data = await getUserByIdService(id);
-        set({ selectedUser: data });
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to fetch user';
-        set({ error: message });
-        get().clearError();
-      } finally {
-        set({ isLoading: false });
-      }
+    fetchUserById: async (id) => {
+      await run(async () => {
+        set({ selectedUser: await getUserByIdService(id) });
+      }).catch(() => undefined);
     },
 
-    createUser: async (formData: CreateUserFormData) => {
-      set({ isLoading: true, error: null });
-      try {
-        const newUser = await createUserService(formData);
-        set((state) => ({ users: [...state.users, newUser], isSuccess: true }));
-        // Auto-clear success flags after 5 seconds
-        setTimeout(() => {
-          set({
-            isSuccess: false,
-          });
-        }, 5000);
-        return newUser;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to create user';
-        set({ error: message });
-        get().clearError();
-        throw error;
-      } finally {
-        set({ isLoading: false });
-      }
+    createUser: async (formData) => {
+      const created = await run(() => createUserService(formData));
+      flash('isSuccess');
+      await reload();
+      return created;
     },
 
-    updateUser: async (id: string, formData: UpdateUserFormData) => {
-      set({ isLoading: true, error: null });
-      try {
-        const updatedUser = await updateUserService(id, formData);
-        set((state) => ({
-          users: state.users.map((user) => (user.id === id ? updatedUser : user)),
-          selectedUser: state.selectedUser?.id === id ? updatedUser : state.selectedUser,
-          isUpdated: true,
-        }));
-        // Auto-clear success flags after 5 seconds
-        setTimeout(() => {
-          set({
-            isUpdated: false,
-          });
-        }, 5000);
-        return updatedUser;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to update user';
-        set({ error: message });
-        get().clearError();
-        throw error;
-      } finally {
-        set({ isLoading: false });
-      }
+    updateUser: async (id, formData) => {
+      const updated = await run(() => updateUserService(id, formData));
+      set((state) => ({
+        users: state.users.map((item) => (item.id === id ? updated : item)),
+        selectedUser: state.selectedUser?.id === id ? updated : state.selectedUser,
+      }));
+      flash('isUpdated');
+      return updated;
     },
 
-    deleteUser: async (id: string) => {
-      set({ isLoading: true, error: null });
-      try {
-        await deleteUserService(id);
-        set((state) => ({
-          users: state.users.filter((user) => user.id !== id),
-          selectedUser: state.selectedUser?.id === id ? null : state.selectedUser,
-          isDeleted: true,
-        }));
-        // Auto-clear success flags after 5 seconds
-        setTimeout(() => {
-          set({
-            isDeleted: false,
-          });
-        }, 5000);
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to delete user';
-        set({ error: message });
-        get().clearError();
-        throw error;
-      } finally {
-        set({ isLoading: false });
-      }
+    deleteUser: async (id) => {
+      await run(() => deleteUserService(id));
+      flash('isDeleted');
+      const { page, limit } = get().pagination;
+      const wasLastOnPage = get().users.length === 1 && page > 1;
+      await get().fetchUsers(wasLastOnPage ? page - 1 : page, limit);
     },
 
-    uploadUsers: async (file: File) => {
-      set({ isLoading: true, error: null });
-      try {
-        const result = await uploadUsersService(file);
-        const updatedUsers = await getUsersService();
-        set({ users: updatedUsers, isUploaded: true });
-        // Auto-clear success flags after 5 seconds
-        setTimeout(() => {
-          set({
-            isUploaded: false,
-          });
-        }, 5000);
-        return result;
-      } catch (error) {
-        const message = error instanceof Error ? error.message : 'Failed to upload users';
-        set({ error: message });
-        get().clearError();
-        throw error;
-      } finally {
-        set({ isLoading: false });
-      }
+    uploadUsers: async (file) => {
+      const result = await run(() => uploadUsersService(file));
+      await reload();
+      return result;
     },
-    clearError: () => {
-      setTimeout(() => {
-        set({ error: null });
-      }, 5000);
-    },
+
+    goToPage: (page) => get().fetchUsers(page, get().pagination.limit),
+    nextPage: () => get().fetchUsers(get().pagination.page + 1, get().pagination.limit),
+    previousPage: () => get().fetchUsers(get().pagination.page - 1, get().pagination.limit),
+    setLimit: (limit) => get().fetchUsers(1, limit),
   };
 });

@@ -1,3 +1,8 @@
+---
+name: prd
+description: Generate interactive Product Requirements Document (PRD) HTML files for one or more features by reading the codebase. Use when asked to create a PRD for X (or X, Y, Z).
+---
+
 # /prd — Generate Product Requirements Document
 
 Generate complete, interactive PRD HTML files for one or **multiple** features. Auto-reads the codebase to extract entities, relationships, API endpoints, and UI components.

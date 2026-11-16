@@ -1,19 +1,13 @@
-from typing import Generic, Optional, TypeVar
+from typing import Any
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-T = TypeVar("T")
-
-
-class ApiResponse(BaseModel, Generic[T]):
-    """Generic API response wrapper."""
-
-    status: str
-    data: Optional[T] = None
-    message: Optional[str] = None
+from app.common.schemas import ErrorItem, PaginationMeta
 
 
 class CreateUserSchema(BaseModel):
+    """Request body for creating a user."""
+
     name: str = Field(..., min_length=2, max_length=255)
     email: EmailStr
     phone: str = Field(..., min_length=5, max_length=20)
@@ -21,6 +15,8 @@ class CreateUserSchema(BaseModel):
 
 
 class UpdateUserSchema(BaseModel):
+    """Request body for updating a user; omitted fields are left unchanged."""
+
     name: str | None = Field(None, min_length=2, max_length=255)
     email: EmailStr | None = None
     phone: str | None = Field(None, min_length=5, max_length=20)
@@ -28,29 +24,45 @@ class UpdateUserSchema(BaseModel):
 
 
 class UserResponse(BaseModel):
+    """A user as returned to clients."""
+
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     name: str
     email: str
     phone: str
     is_active: bool
 
-    class Config:
-        from_attributes = True
+
+class UploadCountData(BaseModel):
+    """Payload of a successful upload."""
+
+    count: int
 
 
-class UserListResponse(ApiResponse[list[UserResponse]]):
-    """Response for list of users."""
+class UserListResponse(BaseModel):
+    """Envelope for the paginated user list."""
 
-    pass
-
-
-class UserDetailResponse(ApiResponse[UserResponse]):
-    """Response for single user."""
-
-    pass
+    status: str = "success"
+    data: list[UserResponse]
+    errors: list[ErrorItem] = Field(default_factory=list)
+    meta: PaginationMeta
 
 
-class CountResponse(ApiResponse[dict]):
-    """Response for count operations."""
+class UserDetailResponse(BaseModel):
+    """Envelope for a single user; `data` is null after a delete."""
 
-    pass
+    status: str = "success"
+    data: UserResponse | None = None
+    errors: list[ErrorItem] = Field(default_factory=list)
+    meta: dict[str, Any] = Field(default_factory=dict)
+
+
+class UploadUsersResponse(BaseModel):
+    """Envelope for the upload result."""
+
+    status: str = "success"
+    data: UploadCountData
+    errors: list[ErrorItem] = Field(default_factory=list)
+    meta: dict[str, Any] = Field(default_factory=dict)

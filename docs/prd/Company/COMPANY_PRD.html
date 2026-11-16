@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company PRD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #f0f2f5; color: #1a202c; }
+        .header { background: linear-gradient(135deg, #1f2937, #374151); color: white; padding: 40px 32px; display: flex; align-items: center; gap: 20px; }
+        .header-icon { font-size: 3em; }
+        .header h1 { font-size: 2em; font-weight: 700; letter-spacing: -0.02em; }
+        .header p  { margin-top: 6px; opacity: 0.75; font-size: 0.95em; }
+        .meta-bar { background: #1e3a5f; display: flex; justify-content: center; flex-wrap: wrap; }
+        .meta-item { padding: 12px 32px; border-right: 1px solid rgba(255,255,255,0.1); text-align: center; }
+        .meta-item:last-child { border-right: none; }
+        .meta-val { font-size: 1.3em; font-weight: 700; color: #60a5fa; }
+        .meta-lbl { font-size: 0.72em; color: rgba(255,255,255,0.55); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+        .layout { display: flex; min-height: calc(100vh - 150px); }
+        .sidebar { width: 230px; flex-shrink: 0; background: #fff; border-right: 1px solid #e5e7eb; padding: 20px 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+        .sidebar-label { font-size: 0.68em; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.08em; padding: 0 16px 10px; }
+        .nav-btn { display: flex; align-items: center; gap: 10px; width: 100%; padding: 10px 16px; border: none; background: transparent; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.88em; color: #4b5563; text-align: left; transition: all 0.15s; border-left: 3px solid transparent; }
+        .nav-btn:hover { background: #f9fafb; color: #1a202c; }
+        .nav-btn.active { background: #eff6ff; color: #2563eb; font-weight: 600; border-left-color: #3b82f6; }
+        .nav-icon { width: 24px; height: 24px; border-radius: 6px; background: #f0f1f3; font-size: 0.85em; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .nav-btn.active .nav-icon { background: #3b82f6; }
+        .main { flex: 1; padding: 32px; overflow: auto; }
+        .panel { display: none; }
+        .panel.active { display: block; }
+        .panel-header { background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 12px 12px 0 0; padding: 24px 28px; color: white; }
+        .panel-badge { display: inline-block; background: rgba(255,255,255,0.18); padding: 3px 12px; border-radius: 20px; font-size: 0.75em; font-weight: 600; letter-spacing: 0.04em; margin-bottom: 10px; }
+        .panel-title { font-size: 1.6em; font-weight: 700; margin-bottom: 6px; }
+        .panel-desc  { opacity: 0.85; font-size: 0.93em; }
+        .panel-body { background: #fff; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px; padding: 32px; }
+        .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 14px 18px; border-radius: 0 8px 8px 0; margin-bottom: 28px; font-size: 0.93em; color: #1e3a8a; line-height: 1.65; }
+        .warn-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 14px 18px; border-radius: 0 8px 8px 0; margin-bottom: 20px; font-size: 0.92em; color: #78350f; }
+        h2.section-heading { font-size: 1.1em; font-weight: 700; color: #1a202c; margin: 28px 0 14px; padding-bottom: 8px; border-bottom: 2px solid #f0f2f5; }
+        h2.section-heading:first-child { margin-top: 0; }
+        .data-table { width: 100%; border-collapse: collapse; margin-bottom: 28px; font-size: 0.9em; }
+        .data-table th { background: #f8f9fb; padding: 10px 14px; text-align: left; font-weight: 600; color: #374151; border: 1px solid #e5e7eb; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.04em; }
+        .data-table td { padding: 10px 14px; border: 1px solid #e5e7eb; color: #4b5563; vertical-align: top; line-height: 1.5; }
+        .data-table tr:nth-child(even) td { background: #fafbfc; }
+        .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 0.78em; font-weight: 600; }
+        .badge-must    { background: #dcfce7; color: #166534; }
+        .badge-should  { background: #dbeafe; color: #1e40af; }
+        .badge-could   { background: #fef9c3; color: #713f12; }
+        .badge-wont    { background: #f3f4f6; color: #6b7280; }
+        .badge-get     { background: #dbeafe; color: #1e40af; }
+        .badge-post    { background: #dcfce7; color: #166534; }
+        .badge-put     { background: #fef9c3; color: #92400e; }
+        .badge-delete  { background: #fee2e2; color: #991b1b; }
+        .badge-status  { background: #ede9fe; color: #5b21b6; }
+        .badge-pk      { background: #fef3c7; color: #92400e; }
+        .badge-fk      { background: #e0f2fe; color: #075985; }
+        .badge-req     { background: #fee2e2; color: #991b1b; }
+        .badge-opt     { background: #f3f4f6; color: #6b7280; }
+        .mermaid-box { background: #fafbfc; border: 1px solid #e5e7eb; border-radius: 10px; padding: 32px 16px; min-height: 280px; overflow-x: auto; display: flex; align-items: center; justify-content: center; margin-bottom: 24px; }
+        .mermaid-box .mermaid { width: 100%; display: flex; justify-content: center; }
+        .mermaid-box svg { max-width: 100%; height: auto; }
+        .story-card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 18px 20px; margin-bottom: 16px; background: #fff; }
+        .story-role { font-size: 0.78em; font-weight: 700; color: #3b82f6; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+        .story-text { font-size: 0.95em; color: #1a202c; margin-bottom: 12px; line-height: 1.6; }
+        .story-criteria { margin: 0; padding-left: 18px; }
+        .story-criteria li { font-size: 0.88em; color: #4b5563; margin-bottom: 4px; }
+        .risk-card { border-left: 4px solid #f87171; background: #fff; border-radius: 0 8px 8px 0; padding: 14px 18px; margin-bottom: 12px; }
+        .risk-title { font-weight: 600; font-size: 0.95em; margin-bottom: 4px; }
+        .risk-mitigation { font-size: 0.88em; color: #6b7280; }
+        .dod-list { list-style: none; padding: 0; }
+        .dod-list li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 0.93em; color: #374151; }
+        .dod-list li:last-child { border-bottom: none; }
+        .dod-check { width: 18px; height: 18px; border: 2px solid #d1d5db; border-radius: 4px; flex-shrink: 0; margin-top: 1px; }
+        .nav-arrows { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; padding-top: 20px; border-top: 1px solid #f0f2f5; }
+        .arrow-btn { display: flex; align-items: center; gap: 8px; padding: 10px 20px; border: 1px solid #e5e7eb; background: #fff; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; font-size: 0.88em; font-weight: 500; color: #374151; transition: all 0.15s; }
+        .arrow-btn:hover { background: #f9fafb; border-color: #3b82f6; color: #2563eb; }
+        .arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .progress-label { font-size: 0.85em; color: #6b7280; }
+        @media (max-width: 768px) {
+            .layout { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; display: flex; padding: 10px; gap: 6px; }
+            .nav-btn { width: auto; padding: 7px 12px; border: 1px solid #e5e7eb; border-radius: 6px; border-left: 3px solid transparent; font-size: 0.8em; }
+            .main { padding: 16px; }
+            .meta-bar { flex-wrap: wrap; }
+            .meta-item { padding: 10px 20px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="header-icon">🏢</div>
+    <div>
+        <h1>Company — Product Requirements Document</h1>
+        <p>v1.0 &nbsp;·&nbsp; 2026-11-14 &nbsp;·&nbsp; Status: Draft</p>
+    </div>
+</div>
+
+<div class="meta-bar">
+    <div class="meta-item"><div class="meta-val">1</div><div class="meta-lbl">Entities</div></div>
+    <div class="meta-item"><div class="meta-val">5</div><div class="meta-lbl">API Endpoints</div></div>
+    <div class="meta-item"><div class="meta-val">5</div><div class="meta-lbl">User Stories</div></div>
+    <div class="meta-item"><div class="meta-val">1</div><div class="meta-lbl">User Roles</div></div>
+    <div class="meta-item"><div class="meta-val">0</div><div class="meta-lbl">Statuses</div></div>
+</div>
+
+<div class="layout">
+
+    <nav class="sidebar">
+        <div class="sidebar-label">Sections</div>
+        <button class="nav-btn active" onclick="showPanel(1)"><span class="nav-icon">📌</span> Overview</button>
+        <button class="nav-btn" onclick="showPanel(2)"><span class="nav-icon">🎯</span> Goals</button>
+        <button class="nav-btn" onclick="showPanel(3)"><span class="nav-icon">👤</span> User Stories</button>
+        <button class="nav-btn" onclick="showPanel(4)"><span class="nav-icon">⚙️</span> Functional Req</button>
+        <button class="nav-btn" onclick="showPanel(5)"><span class="nav-icon">🛡️</span> Non-Functional</button>
+        <button class="nav-btn" onclick="showPanel(6)"><span class="nav-icon">🗄️</span> Data Model</button>
+        <button class="nav-btn" onclick="showPanel(7)"><span class="nav-icon">📡</span> API Contract</button>
+        <button class="nav-btn" onclick="showPanel(8)"><span class="nav-icon">🎨</span> UI Spec</button>
+        <button class="nav-btn" onclick="showPanel(9)"><span class="nav-icon">🔗</span> Dependencies</button>
+        <button class="nav-btn" onclick="showPanel(10)"><span class="nav-icon">⚠️</span> Risks</button>
+        <button class="nav-btn" onclick="showPanel(11)"><span class="nav-icon">✅</span> Definition of Done</button>
+    </nav>
+
+    <main class="main">
+
+        <div id="panel-1" class="panel active">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 1 OF 11</div>
+                <div class="panel-title">Executive Overview</div>
+                <div class="panel-desc">What this feature is, why it exists, and who it serves</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The Company feature stores the organisations the system works for: each has a name, address, phone number and IANA timezone. It provides full create, read, update and delete through a paginated grid and a creation form.</div>
+
+                <h2 class="section-heading">Problem Statement</h2>
+                <p style="color:#4b5563;line-height:1.7;margin-bottom:20px;">Other features need a consistent record of the company they act for, including the timezone used to interpret dates and times. Without a managed company record, that data is scattered or hard-coded.</p>
+
+                <h2 class="section-heading">Solution</h2>
+                <p style="color:#4b5563;line-height:1.7;margin-bottom:20px;">A versioned REST API (<code>/v1/companies</code>) with server-side validation of every field, plus a Companies page with an inline-editable, paginated grid and a New Company form that surfaces server-side field errors.</p>
+
+                <h2 class="section-heading">Success Metrics</h2>
+                <table class="data-table">
+                    <thead><tr><th>Metric</th><th>Target</th><th>How Measured</th></tr></thead>
+                    <tbody>
+                        <tr><td>Invalid timezone accepted</td><td>0 — every value must be a known IANA name</td><td>API tests (422 on <code>Mars/Base</code>)</td></tr>
+                        <tr><td>Duplicate company names</td><td>0 — names are unique ignoring case</td><td>API tests (409 conflict)</td></tr>
+                        <tr><td>List response shape</td><td>100% of list responses carry full pagination meta</td><td>Envelope assertions in backend tests</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" disabled>← Previous</button>
+                    <span class="progress-label">1 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(2)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-2" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 2 OF 11</div>
+                <div class="panel-title">Goals and Non-Goals</div>
+                <div class="panel-desc">Explicit scope boundaries to prevent feature creep</div>
+            </div>
+            <div class="panel-body">
+                <h2 class="section-heading">Goals — In Scope for v1</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Goal</th><th>Priority</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Create, view, edit and delete companies with name, address, phone number and timezone</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>2</td><td>Validate timezone against the IANA database and reject unknown values</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>3</td><td>Paginate the company list at the repository layer and show it with MUI pagination</td><td><span class="badge badge-must">Must</span></td></tr>
+                        <tr><td>4</td><td>Show server-side field errors next to the offending form field</td><td><span class="badge badge-should">Should</span></td></tr>
+                        <tr><td>5</td><td>Export the current page to Excel from the grid toolbar</td><td><span class="badge badge-could">Could</span></td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Non-Goals — Explicitly Out of Scope</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Non-Goal</th><th>Reason</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Database persistence</td><td>The app uses an in-memory repository; the ORM model is a schema reference only</td></tr>
+                        <tr><td>2</td><td>Authentication and per-user company access</td><td>No auth exists in the template yet</td></tr>
+                        <tr><td>3</td><td>Bulk import from Excel</td><td>Not requested; the user feature's upload is deliberately not copied</td></tr>
+                        <tr><td>4</td><td>Phone number normalisation (E.164)</td><td>Values are stored as entered after trimming</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(1)">← Previous</button>
+                    <span class="progress-label">2 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(3)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-3" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 3 OF 11</div>
+                <div class="panel-title">User Personas and Stories</div>
+                <div class="panel-desc">Who uses this feature and what they need to accomplish</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">Each story follows: <strong>As a [role], I want to [action] so that [benefit].</strong> Acceptance criteria define when a story is done.</div>
+
+                <div class="story-card">
+                    <div class="story-role">Administrator</div>
+                    <div class="story-text">As an administrator, I want to create a company so that its details and timezone are available to the rest of the system.</div>
+                    <ul class="story-criteria">
+                        <li>Given valid name, address, phone number and timezone, the company is created and appears in the list</li>
+                        <li>Given an invalid timezone, the Timezone field shows the server's error and nothing is created</li>
+                        <li>Given a name that already exists (any letter case), I see a conflict error</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">Administrator</div>
+                    <div class="story-text">As an administrator, I want to browse companies page by page so that the list stays fast as it grows.</div>
+                    <ul class="story-criteria">
+                        <li>The grid shows one page at a time with Previous, Next, page numbers and an "X of Y total" indicator</li>
+                        <li>Changing the page size returns me to page 1</li>
+                        <li>Previous and Next are disabled at the first and last page</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">Administrator</div>
+                    <div class="story-text">As an administrator, I want to edit a company inline so that corrections take seconds.</div>
+                    <ul class="story-criteria">
+                        <li>Double-clicking a row opens it for inline editing; Update saves it</li>
+                        <li>A rejected change is reverted by reloading the page of data and the error is shown</li>
+                        <li>Renaming a company to its own name in a different case is allowed</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">Administrator</div>
+                    <div class="story-text">As an administrator, I want to delete a company so that obsolete records disappear.</div>
+                    <ul class="story-criteria">
+                        <li>Selecting a row and choosing Delete removes it and shows a confirmation snackbar</li>
+                        <li>Deleting the last row of a page beyond the first loads the previous page</li>
+                    </ul>
+                </div>
+
+                <div class="story-card">
+                    <div class="story-role">Administrator</div>
+                    <div class="story-text">As an administrator, I want to open a single company by id so that other screens can link to it.</div>
+                    <ul class="story-criteria">
+                        <li>An unknown id returns a not-found error in the standard envelope</li>
+                    </ul>
+                </div>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(2)">← Previous</button>
+                    <span class="progress-label">3 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(4)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-4" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 4 OF 11</div>
+                <div class="panel-title">Functional Requirements</div>
+                <div class="panel-desc">What the system must do — MoSCoW prioritised</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">
+                    <strong>MoSCoW:</strong>
+                    <span class="badge badge-must">Must</span> — required for launch &nbsp;
+                    <span class="badge badge-should">Should</span> — important but not blocking &nbsp;
+                    <span class="badge badge-could">Could</span> — nice to have &nbsp;
+                    <span class="badge badge-wont">Won't</span> — out of scope
+                </div>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Requirement</th><th>Priority</th><th>Notes</th></tr></thead>
+                    <tbody>
+                        <tr><td>FR-1</td><td>Create a company from name, address, phone number and timezone</td><td><span class="badge badge-must">Must</span></td><td><code>POST /v1/companies</code> returns 201</td></tr>
+                        <tr><td>FR-2</td><td>Trim all text fields before validating and storing</td><td><span class="badge badge-must">Must</span></td><td>A whitespace-only name or address is rejected</td></tr>
+                        <tr><td>FR-3</td><td>Name: 2–255 characters, unique ignoring case</td><td><span class="badge badge-must">Must</span></td><td>Duplicate → 409 <code>conflict</code></td></tr>
+                        <tr><td>FR-4</td><td>Address: 5–500 characters</td><td><span class="badge badge-must">Must</span></td><td>422 <code>validation-error</code> with <code>field: address</code></td></tr>
+                        <tr><td>FR-5</td><td>Phone number: optional leading +, then 7–20 digits, spaces, hyphens or parentheses</td><td><span class="badge badge-must">Must</span></td><td>Pattern <code>^\+?[0-9\s\-()]{7,20}$</code></td></tr>
+                        <tr><td>FR-6</td><td>Timezone must be a known IANA name</td><td><span class="badge badge-must">Must</span></td><td>Checked with <code>zoneinfo.available_timezones()</code>; needs the <code>tzdata</code> package on Windows</td></tr>
+                        <tr><td>FR-7</td><td>List companies with <code>page</code> (default 1) and <code>limit</code> (default 20, 1–100)</td><td><span class="badge badge-must">Must</span></td><td>Sliced in the repository; returns total count</td></tr>
+                        <tr><td>FR-8</td><td>Read, update and delete a company by id</td><td><span class="badge badge-must">Must</span></td><td>Unknown id → 404 <code>not-found</code></td></tr>
+                        <tr><td>FR-9</td><td>Partial update: omitted fields are unchanged; a failed update changes nothing</td><td><span class="badge badge-must">Must</span></td><td>Changes are applied to a copy after validation</td></tr>
+                        <tr><td>FR-10</td><td>Report request-validation errors and unexpected errors in the response envelope</td><td><span class="badge badge-must">Must</span></td><td><code>EnvelopeRoute</code>; no plain-text 500s</td></tr>
+                        <tr><td>FR-11</td><td>Seed four sample companies on startup</td><td><span class="badge badge-should">Should</span></td><td><code>initialize_sample_data()</code></td></tr>
+                        <tr><td>FR-12</td><td>Excel export of the visible grid page</td><td><span class="badge badge-could">Could</span></td><td>Grid toolbar</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(3)">← Previous</button>
+                    <span class="progress-label">4 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(5)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-5" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 5 OF 11</div>
+                <div class="panel-title">Non-Functional Requirements</div>
+                <div class="panel-desc">Performance, security, scalability, and reliability standards</div>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead><tr><th>Category</th><th>Requirement</th><th>Target</th></tr></thead>
+                    <tbody>
+                        <tr><td>Response format</td><td>Standard envelope on every response</td><td><code>status</code>, <code>data</code>, <code>errors</code>, <code>meta</code>; errors carry <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>field</code></td></tr>
+                        <tr><td>Pagination</td><td>All list endpoints paginated</td><td>Default 20, maximum 100 per page; meta has page, limit, total, totalPages, hasNextPage, hasPreviousPage</td></tr>
+                        <tr><td>Security</td><td>No stack traces or internal details in responses</td><td>Unexpected errors return a generic <code>server-error</code> and are logged server-side</td></tr>
+                        <tr><td>Security</td><td>CORS</td><td>Allowed origin <code>http://localhost:4000</code> (frontend)</td></tr>
+                        <tr><td>Performance</td><td>Timezone lookup</td><td>IANA names loaded once and cached</td></tr>
+                        <tr><td>Maintainability</td><td>Clean architecture</td><td>Domain has no framework imports; service depends on the repository interface</td></tr>
+                        <tr><td>Quality</td><td>Automated checks</td><td>19 backend API tests; isort, black, flake8, mypy, Prettier, ESLint and tsc all pass</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(4)">← Previous</button>
+                    <span class="progress-label">5 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(6)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-6" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 6 OF 11</div>
+                <div class="panel-title">Data Model</div>
+                <div class="panel-desc">Entities, fields, relationships, constraints, and ERD</div>
+            </div>
+            <div class="panel-body">
+
+                <h2 class="section-heading">Entity Relationship Diagram</h2>
+                <div class="info-box">Generated from <code>infrastructure/models/company_model.py</code>. Company is a stand-alone entity with no foreign keys.</div>
+                <div class="mermaid-box">
+                    <div class="mermaid" id="m-erd">
+erDiagram
+    COMPANIES {
+        string     id            PK "UUID, 36 chars"
+        string     name          "Unique ignoring case, 255 chars"
+        string     address       "500 chars"
+        string     phone_number  "20 chars"
+        string     timezone      "IANA name, 64 chars"
+        datetime   created_at    "Audit timestamp"
+        datetime   updated_at    "Audit timestamp"
+    }
+                    </div>
+                </div>
+
+                <h2 class="section-heading">Entity Definitions</h2>
+
+                <h3 style="font-size:1em;font-weight:600;color:#374151;margin:20px 0 10px;">COMPANIES</h3>
+                <table class="data-table">
+                    <thead><tr><th>Field</th><th>Type</th><th>Key</th><th>Nullable</th><th>Default</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td>id</td><td>VARCHAR(36)</td><td><span class="badge badge-pk">PK</span></td><td>No</td><td>uuid4 (generated by the repository)</td><td>Primary key</td></tr>
+                        <tr><td>name</td><td>VARCHAR(255)</td><td>INDEX, UNIQUE (lower(name))</td><td>No</td><td>—</td><td>Display name</td></tr>
+                        <tr><td>address</td><td>VARCHAR(500)</td><td>—</td><td>No</td><td>—</td><td>Postal address</td></tr>
+                        <tr><td>phone_number</td><td>VARCHAR(20)</td><td>INDEX</td><td>No</td><td>—</td><td>Contact phone number</td></tr>
+                        <tr><td>timezone</td><td>VARCHAR(64)</td><td>—</td><td>No</td><td>—</td><td>IANA timezone, e.g. Asia/Singapore</td></tr>
+                        <tr><td>created_at</td><td>DATETIME</td><td>—</td><td>No</td><td>now()</td><td>Audit timestamp</td></tr>
+                        <tr><td>updated_at</td><td>DATETIME</td><td>—</td><td>No</td><td>now(), on update</td><td>Audit timestamp</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Relationships</h2>
+                <table class="data-table">
+                    <thead><tr><th>From Entity</th><th>Cardinality</th><th>To Entity</th><th>Foreign Key</th><th>On Delete</th><th>Description</th></tr></thead>
+                    <tbody>
+                        <tr><td colspan="6">None — Company has no foreign keys in v1.</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Status Enumerations</h2>
+                <table class="data-table">
+                    <thead><tr><th>Entity</th><th>Field</th><th>Values</th><th>Transitions Allowed</th></tr></thead>
+                    <tbody>
+                        <tr><td colspan="4">None — Company has no status field.</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(5)">← Previous</button>
+                    <span class="progress-label">6 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(7)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-7" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 7 OF 11</div>
+                <div class="panel-title">API Contract</div>
+                <div class="panel-desc">All endpoints, methods, auth, request and response shapes</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">All endpoints use the <strong>/v1/</strong> prefix and return the standard response envelope: <code>status</code>, <code>data</code>, <code>errors</code>, <code>meta</code>.</div>
+                <table class="data-table">
+                    <thead><tr><th>Method</th><th>Endpoint</th><th>Auth</th><th>Description</th><th>Request Body</th><th>Response</th></tr></thead>
+                    <tbody>
+                        <tr>
+                            <td><span class="badge badge-post">POST</span></td>
+                            <td>/v1/companies</td>
+                            <td>No</td>
+                            <td>Create a company</td>
+                            <td><code>name</code>, <code>address</code>, <code>phone_number</code>, <code>timezone</code> (all required)</td>
+                            <td>201 — company object; 409 duplicate name; 422 validation</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-get">GET</span></td>
+                            <td>/v1/companies</td>
+                            <td>No</td>
+                            <td>List companies, paginated</td>
+                            <td>Query: <code>page</code> (≥1, default 1), <code>limit</code> (1–100, default 20)</td>
+                            <td>200 — array of companies plus full pagination meta; 422 for bad paging</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-get">GET</span></td>
+                            <td>/v1/companies/{id}</td>
+                            <td>No</td>
+                            <td>Get one company</td>
+                            <td>—</td>
+                            <td>200 — company object; 404 not found</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-put">PUT</span></td>
+                            <td>/v1/companies/{id}</td>
+                            <td>No</td>
+                            <td>Update the supplied fields</td>
+                            <td>Any of <code>name</code>, <code>address</code>, <code>phone_number</code>, <code>timezone</code></td>
+                            <td>200 — updated company; 404; 409; 422</td>
+                        </tr>
+                        <tr>
+                            <td><span class="badge badge-delete">DELETE</span></td>
+                            <td>/v1/companies/{id}</td>
+                            <td>No</td>
+                            <td>Delete a company</td>
+                            <td>—</td>
+                            <td>200 — <code>data: null</code>; 404 not found</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Company object</h2>
+                <table class="data-table">
+                    <thead><tr><th>Field</th><th>Type</th></tr></thead>
+                    <tbody>
+                        <tr><td>id</td><td>string (UUID)</td></tr>
+                        <tr><td>name</td><td>string</td></tr>
+                        <tr><td>address</td><td>string</td></tr>
+                        <tr><td>phone_number</td><td>string</td></tr>
+                        <tr><td>timezone</td><td>string (IANA)</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(6)">← Previous</button>
+                    <span class="progress-label">7 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(8)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-8" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 8 OF 11</div>
+                <div class="panel-title">UI Specification</div>
+                <div class="panel-desc">Pages, components, forms, validation rules, and states</div>
+            </div>
+            <div class="panel-body">
+
+                <h2 class="section-heading">Pages and Routes</h2>
+                <table class="data-table">
+                    <thead><tr><th>Route</th><th>Page Name</th><th>Components Used</th><th>Auth Required</th></tr></thead>
+                    <tbody>
+                        <tr><td>/companies</td><td>Companies</td><td><code>CompaniesView</code>, <code>CompanyList</code> (Syncfusion grid, MUI Pagination, AppSnackbar), <code>CompanyForm</code> (in a dialog)</td><td>No</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Form Fields and Validation</h2>
+                <table class="data-table">
+                    <thead><tr><th>Form</th><th>Field</th><th>Type</th><th>Required</th><th>Validation Rules</th></tr></thead>
+                    <tbody>
+                        <tr><td>New Company</td><td>name</td><td>text</td><td><span class="badge badge-req">Required</span></td><td>Trimmed, 2–255 characters</td></tr>
+                        <tr><td>New Company</td><td>address</td><td>multiline text</td><td><span class="badge badge-req">Required</span></td><td>Trimmed, 5–500 characters</td></tr>
+                        <tr><td>New Company</td><td>phone_number</td><td>text</td><td><span class="badge badge-req">Required</span></td><td>Pattern <code>^\+?[0-9\s\-()]{7,20}$</code></td></tr>
+                        <tr><td>New Company</td><td>timezone</td><td>autocomplete</td><td><span class="badge badge-req">Required</span></td><td>Non-empty, up to 64 characters; options come from the browser's IANA list, the backend is the authority</td></tr>
+                        <tr><td>Grid (inline add / edit)</td><td>all four fields</td><td>text, dropdown for timezone</td><td><span class="badge badge-req">Required</span></td><td>Grid rules (required, minimum length) plus the same Zod schemas in the service</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">UI States Required</h2>
+                <table class="data-table">
+                    <thead><tr><th>Component</th><th>Loading State</th><th>Empty State</th><th>Error State</th></tr></thead>
+                    <tbody>
+                        <tr><td>CompanyList</td><td>Full-screen backdrop with spinner; Refresh and pagination disabled</td><td>Empty grid with "0 of 0 total" and a single page</td><td>AppSnackbar with the combined error text</td></tr>
+                        <tr><td>CompanyForm</td><td>Submit button shows a spinner; fields disabled</td><td>—</td><td>Zod errors and server field errors as helper text under each field</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(7)">← Previous</button>
+                    <span class="progress-label">8 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(9)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-9" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 9 OF 11</div>
+                <div class="panel-title">Dependencies and Integrations</div>
+                <div class="panel-desc">External systems, internal services, and third-party dependencies</div>
+            </div>
+            <div class="panel-body">
+                <table class="data-table">
+                    <thead><tr><th>Dependency</th><th>Type</th><th>Required For</th><th>Status</th></tr></thead>
+                    <tbody>
+                        <tr><td>tzdata (Python)</td><td>Library</td><td>Timezone validation on Windows, which ships no tz database</td><td>Added</td></tr>
+                        <tr><td>httpx 0.27.2 (dev)</td><td>Library</td><td>FastAPI <code>TestClient</code>; 0.28 is incompatible with the pinned Starlette</td><td>Added</td></tr>
+                        <tr><td>app/common (envelope helpers)</td><td>Internal</td><td>Error envelope, pagination meta, <code>EnvelopeRoute</code></td><td>New</td></tr>
+                        <tr><td>Frontend core API client</td><td>Internal</td><td>Interceptor now keeps <code>meta</code> and structured errors; <code>/users</code> unaffected</td><td>Changed</td></tr>
+                        <tr><td>Syncfusion grid, MUI, React Hook Form, Zod, Zustand</td><td>Library</td><td>Grid, pagination, form, validation, state</td><td>Existing</td></tr>
+                        <tr><td>Country feature</td><td>Internal</td><td>The backend entry point imports it at startup; unrelated to company data</td><td>Pending</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(8)">← Previous</button>
+                    <span class="progress-label">9 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(10)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-10" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 10 OF 11</div>
+                <div class="panel-title">Risks and Assumptions</div>
+                <div class="panel-desc">Known risks, open questions, and assumptions being made</div>
+            </div>
+            <div class="panel-body">
+
+                <h2 class="section-heading">Technical Risks</h2>
+                <div class="risk-card">
+                    <div class="risk-title">Data is lost on restart</div>
+                    <div class="risk-mitigation">Mitigation: the repository is in-memory by design. The ORM model documents the intended schema for a later database repository.</div>
+                </div>
+                <div class="risk-card">
+                    <div class="risk-title">Browser timezone list differs from the server's list</div>
+                    <div class="risk-mitigation">Mitigation: the server is the authority and returns a field-level error for any name it does not know.</div>
+                </div>
+                <div class="risk-card">
+                    <div class="risk-title">Grid add and edit bypass the form</div>
+                    <div class="risk-mitigation">Mitigation: both paths go through the same store action, Zod schemas and server validation.</div>
+                </div>
+
+                <h2 class="section-heading">Assumptions</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Assumption</th><th>If Wrong, Impact</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Timezone is a single IANA name per company</td><td>Multi-site companies would need a separate location entity</td></tr>
+                        <tr><td>2</td><td>Phone numbers are international-style strings, not normalised</td><td>Search and dedupe by phone would need normalisation</td></tr>
+                        <tr><td>3</td><td>Company names are unique ignoring case</td><td>Legitimate same-name companies would be blocked</td></tr>
+                    </tbody>
+                </table>
+
+                <h2 class="section-heading">Open Questions</h2>
+                <table class="data-table">
+                    <thead><tr><th>#</th><th>Question</th><th>Owner</th><th>Due</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Should other features reference a company by id, and if so which feature is first?</td><td>Product owner</td><td>TBD</td></tr>
+                        <tr><td>2</td><td>Is a soft delete needed instead of removing the record?</td><td>Product owner</td><td>TBD</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(9)">← Previous</button>
+                    <span class="progress-label">10 of 11</span>
+                    <button class="arrow-btn" onclick="showPanel(11)">Next →</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-11" class="panel">
+            <div class="panel-header">
+                <div class="panel-badge">SECTION 11 OF 11</div>
+                <div class="panel-title">Definition of Done</div>
+                <div class="panel-desc">Checklist — every item must be complete before the feature ships</div>
+            </div>
+            <div class="panel-body">
+                <div class="info-box">The feature is considered complete only when ALL items below are checked off.</div>
+
+                <h2 class="section-heading">Backend</h2>
+                <ul class="dod-list">
+                    <li><span class="dod-check"></span>All API endpoints implemented and returning standard response envelope</li>
+                    <li><span class="dod-check"></span>Pydantic input/output schemas defined for all endpoints</li>
+                    <li><span class="dod-check"></span>Business rules validated in service layer</li>
+                    <li><span class="dod-check"></span>All list endpoints paginated (page + limit)</li>
+                    <li><span class="dod-check"></span>Proper HTTP status codes returned for all error cases</li>
+                    <li><span class="dod-check"></span>No stack traces exposed in error responses</li>
+                </ul>
+
+                <h2 class="section-heading">Frontend</h2>
+                <ul class="dod-list">
+                    <li><span class="dod-check"></span>All API endpoints have a corresponding UI page or component</li>
+                    <li><span class="dod-check"></span>Zod validation schemas match backend Pydantic schemas</li>
+                    <li><span class="dod-check"></span>Zustand store manages all feature state with pagination</li>
+                    <li><span class="dod-check"></span>Loading, empty, and error states implemented on all components</li>
+                    <li><span class="dod-check"></span>Validation errors mapped to form fields</li>
+                    <li><span class="dod-check"></span>Snackbar notifications for success and error actions</li>
+                </ul>
+
+                <h2 class="section-heading">Documentation</h2>
+                <ul class="dod-list">
+                    <li><span class="dod-check"></span>PRD document complete (this file)</li>
+                    <li><span class="dod-check"></span>User flow diagrams generated (<code>/userflow</code>)</li>
+                    <li><span class="dod-check"></span>All functions and classes have docstrings</li>
+                </ul>
+
+                <div class="nav-arrows">
+                    <button class="arrow-btn" onclick="showPanel(10)">← Previous</button>
+                    <span class="progress-label">11 of 11</span>
+                    <button class="arrow-btn" disabled>Next →</button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
+
+    const rendered = new Set();
+    async function renderMermaid(id) {
+        if (rendered.has(id)) return;
+        const el = document.getElementById(id);
+        if (!el) return;
+        try { await mermaid.run({ nodes: [el] }); rendered.add(id); }
+        catch(e) { el.innerHTML = '<div style="color:#dc2626;padding:16px">ERD render error: ' + e.message + '</div>'; }
+    }
+    window._mermaidRender = renderMermaid;
+</script>
+
+<script>
+    let currentPanel = 1;
+
+    async function showPanel(n) {
+        document.getElementById('panel-' + currentPanel).classList.remove('active');
+        document.querySelectorAll('.nav-btn')[currentPanel - 1].classList.remove('active');
+        document.getElementById('panel-' + n).classList.add('active');
+        document.querySelectorAll('.nav-btn')[n - 1].classList.add('active');
+        currentPanel = n;
+        if (n === 6 && window._mermaidRender) await window._mermaidRender('m-erd');
+        document.querySelector('.main').scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    window.showPanel = showPanel;
+</script>
+</body>
+</html>
